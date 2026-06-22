@@ -1,0 +1,22 @@
+name: pushbus
+
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    image: pushbus-mvp:productionfull
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      CITTATI_BASE_URL: "${CITTATI_BASE_URL:-https://flits.cittati.com.br}"
+      CITTATI_APP_CODE: "${CITTATI_APP_CODE:-200}"
+      CITTATI_CLIENT_ID: "${CITTATI_CLIENT_ID:-1}"
+      CITTATI_COMPANY_ID: "${CITTATI_COMPANY_ID:-}"
+      CITTATI_USERNAME: "${CITTATI_USERNAME:-}"
+      CITTATI_PASSWORD: "${CITTATI_PASSWORD:-}"
+      CITTATI_TOKEN: "${CITTATI_TOKEN:-}"
+    ports:
+      - "3000:3000"

@@ -18,6 +18,50 @@ http://localhost:3000
 
 Se definir `PORT` no `.env`, troque `3000` pela porta configurada.
 
+## Como rodar com Docker
+
+Crie o `.env` local a partir do exemplo e preencha as variaveis da Cittati/FLITS:
+
+```powershell
+copy .env.example .env
+```
+
+Suba o container na porta 3000:
+
+```bash
+docker compose up -d --build
+```
+
+Abra:
+
+```text
+http://localhost:3000
+```
+
+Comandos uteis:
+
+```bash
+docker compose ps
+docker compose logs -f app
+npm run smoke
+docker compose down
+```
+
+O Docker Compose le o arquivo `.env` do diretorio do projeto e envia as variaveis para o container. Em um ambiente de producao real, prefira configurar essas variaveis diretamente no provedor de deploy ou em um gerenciador de secrets.
+
+## Perfil de producao
+
+- Imagem baseada em `node:22-alpine`.
+- Instalacao deterministica com `npm ci --omit=dev`.
+- Processo executando como usuario nao-root `node`.
+- `tini` como entrypoint para tratamento correto de sinais.
+- `HEALTHCHECK` HTTP em `/api/health`.
+- `.dockerignore` exclui `.env`, `node_modules`, compactados e artefatos locais.
+- Servidor aceita `HOST` e `PORT`, usando `HOST=0.0.0.0` no container.
+- O header `X-Powered-By` do Express fica desabilitado.
+
+Relatorio da validacao local: [`docs/production-readiness-report.md`](docs/production-readiness-report.md).
+
 ## Configuracao
 
 No arquivo `.env`, preencha:

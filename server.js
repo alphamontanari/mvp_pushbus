@@ -1,10 +1,12 @@
 require("dotenv").config();
 
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+const HOST = process.env.HOST || "0.0.0.0";
 
 const CITTATI_BASE_URL = process.env.CITTATI_BASE_URL || "https://flits.cittati.com.br";
 const CITTATI_APP_CODE = process.env.CITTATI_APP_CODE || "200";
@@ -25,9 +27,10 @@ const DEFAULT_VEHICLES = [
   129988, 119915, 119387, 129992, 129989, 129956, 129955
 ];
 
+app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
 function missingConfig() {
   const missing = [];
@@ -280,6 +283,18 @@ app.post("/api/vehicles/positions", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Painel rodando em http://localhost:${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  const displayHost = HOST === "0.0.0.0" ? "localhost" : HOST;
+  console.log(`Painel rodando em http://${displayHost}:${PORT}`);
 });
+
+function shutdown(signal) {
+  console.log(`${signal} recebido. Encerrando servidor HTTP...`);
+  server.close(() => {
+    console.log("Servidor HTTP encerrado.");
+    process.exit(0);
+  });
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
