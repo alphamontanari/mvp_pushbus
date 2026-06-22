@@ -1,13 +1,21 @@
-const CACHE_NAME = "pushbus-v0-0-1-flow-mapa";
+const CACHE_NAME = "mvppushbs-v0-0-3-shell";
 const SHELL_ASSETS = [
   "/",
   "/index.html",
   "/mapa.html",
+  "/linha-01a-pontos.html",
+  "/realtime-pontos.html",
   "/pushbus.css",
   "/pushbus.js",
   "/pushbus-data.js",
   "/mapa.css",
   "/mapa.js",
+  "/linha-01a-pontos.css",
+  "/linha-01a-pontos.js",
+  "/realtime-pontos.css",
+  "/realtime-pontos.js",
+  "/nav.css",
+  "/nav.js",
   "/manifest.webmanifest",
   "/pushbus-icon.svg",
   "/icons/icon-192.png",
@@ -40,6 +48,10 @@ self.addEventListener("fetch", event => {
 
   event.respondWith(
     caches.match(event.request)
-      .then(cached => cached || fetch(event.request))
+      .then(cached => {
+        if (cached) return cached;
+
+        return caches.match(url.pathname).then(fallback => fallback || fetch(event.request));
+      })
   );
 });

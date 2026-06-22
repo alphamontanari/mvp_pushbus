@@ -68,6 +68,7 @@ let selectedVehicleKey = "";
 let timer = null;
 let refreshInFlight = false;
 let notificationsEnabled = false;
+let hasFittedVehicles = false;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -228,7 +229,12 @@ function selectVehicle(key, options = {}) {
   renderPointList(latestVehicles);
 
   const vehicle = selectedVehicle();
-  if (!vehicle) return;
+  if (!vehicle) {
+    if (options.center) fitAll();
+    els.eventHeadline.textContent = "Todos os onibus no mapa";
+    els.eventDetail.textContent = `${latestVehicles.length} onibus exibidos nos mesmos pontos da linha 01A.`;
+    return;
+  }
 
   const marker = vehicleMarkers.get(selectedVehicleKey);
   if (options.center && marker) {
@@ -284,7 +290,7 @@ function renderVehicleSelect(vehicles) {
 
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = vehicles.length ? "Escolha um onibus" : "Nenhum onibus retornado";
+  placeholder.textContent = vehicles.length ? "Todos os onibus" : "Nenhum onibus retornado";
   els.vehicleSelect.appendChild(placeholder);
 
   vehicles
@@ -334,7 +340,9 @@ function renderSelectedVehicle() {
   const vehicle = selectedVehicle();
 
   if (!vehicle) {
-    els.selectedVehicleSummary.textContent = "Escolha pelo combo ou de duplo clique em um onibus no mapa.";
+    els.selectedVehicleSummary.textContent = latestVehicles.length
+      ? "Todos os onibus estao visiveis. Escolha pelo combo ou de duplo clique em um marcador para focar."
+      : "Aguardando onibus para exibir no mapa.";
     return;
   }
 
@@ -519,6 +527,11 @@ async function refresh() {
     renderSelectedVehicle();
     renderVehicleMarkers(vehicles);
     renderPointList(vehicles);
+
+    if (!selectedVehicleKey && vehicles.length && !hasFittedVehicles) {
+      fitAll();
+      hasFittedVehicles = true;
+    }
 
     els.vehicleCount.textContent = String(vehicles.length);
     els.pointCount.textContent = String(STOPS.length);

@@ -1,6 +1,6 @@
-# PushBus V0.0.1 + Cittati/FLITS + Leaflet + Node
+# MVPPUSHBS + Cittati/FLITS + Leaflet + Node
 
-App local/PWA para acompanhar linhas, carros e pontos de onibus usando um proxy Node/Express com autenticacao na API Cittati/FLITS.
+App local/PWA instalavel para acompanhar linhas, carros e pontos de onibus usando um proxy Node/Express com autenticacao na API Cittati/FLITS.
 
 ## Como rodar
 
@@ -83,11 +83,13 @@ Nao coloque usuario, senha ou token no JavaScript publico.
 
 | Pagina | URL local | Descricao |
 | --- | --- | --- |
-| PushBus V0.0.1 | `http://localhost:3000/` | App principal instalavel no celular. Abre na lista de linhas e, ao selecionar uma linha, exibe a progressao dos pontos e o onibus/carro monitorado. |
-| PushBus V0.0.1 | `http://localhost:3000/index.html` | Mesma tela principal, acessada pelo arquivo HTML diretamente. |
-| Mapa de todos os onibus | `http://localhost:3000/mapa.html` | Mapa com os mesmos pontos da linha 01A, mas consultando todos os veiculos padrao sem filtro de linha. Permite focar um onibus pelo select ou por duplo clique no marcador, e qualquer onibus gera mensagem ao passar no ponto. |
+| MVPPUSHBS | `http://localhost:3000/` | App principal instalavel no celular. Abre na lista de linhas e, ao selecionar uma linha, exibe a progressao dos pontos e o onibus/carro monitorado. Inclui botao para ativar push local. |
+| MVPPUSHBS | `http://localhost:3000/index.html` | Mesma tela principal, acessada pelo arquivo HTML diretamente. |
+| Mapa de todos os onibus | `http://localhost:3000/mapa.html` | Mapa com os mesmos pontos da linha 01A, mas consultando todos os veiculos padrao sem filtro de linha. Permite mostrar todos, focar um onibus pelo select ou por duplo clique no marcador, e qualquer onibus gera mensagem ao passar no ponto. |
 | Linha 01A por ponto | `http://localhost:3000/linha-01a-pontos.html` | Tela com pontos da linha 01A, geofence, mapa dos veiculos filtrados e mensagens de entrada/saida dos pontos. |
 | Onibus em tempo real por ponto | `http://localhost:3000/realtime-pontos.html` | Nova tela com um veiculo em tempo real, pontos no mapa, circulos de geofence e mensagem `Passou no ponto X` quando o veiculo entra no raio do ponto. |
+
+Todas as paginas carregam um menu responsivo tipo sanduiche para navegar entre Inicio, Mapa, Linha 01A e Tempo real.
 
 Arquivos estaticos carregados pelas paginas:
 
@@ -105,9 +107,11 @@ http://localhost:3000/linha-01a-pontos.css
 http://localhost:3000/linha-01a-pontos.js
 http://localhost:3000/realtime-pontos.css
 http://localhost:3000/realtime-pontos.js
+http://localhost:3000/nav.css
+http://localhost:3000/nav.js
 ```
 
-## PushBus V0.0.1
+## MVPPUSHBS
 
 - A tela inicial mostra as linhas cadastradas e permite pesquisar por codigo/nome.
 - A primeira versao vem com a Linha 01A/001A a partir da planilha `LEVANTAMENTO PONTOS DE ONIBUS.xlsx`.
@@ -116,7 +120,7 @@ http://localhost:3000/realtime-pontos.js
 - Quando o carro entra no raio de um ponto, o app registra `Passou no ponto X`.
 - A progressao marca todos os pontos anteriores como concluidos quando um ponto mais adiante e detectado.
 - Ao chegar no ponto final, todos os pontos ficam marcados por 30 segundos e a verificacao da linha e reiniciada.
-- O app tem `manifest.webmanifest`, `sw.js` e icones para instalacao como PWA.
+- O app tem `manifest.webmanifest`, `sw.js`, icones e menu compartilhado para instalacao como PWA no celular.
 
 Observacao: o arquivo `pushbus-geofence-leaflet(1).html` esta na raiz do projeto e nao e publicado pelo Express, porque o servidor usa apenas `express.static("public")`. Para acessar por `localhost`, mova esse arquivo para a pasta `public`.
 

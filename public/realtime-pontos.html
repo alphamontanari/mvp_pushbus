@@ -2,15 +2,23 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>&Ocirc;nibus em tempo real por ponto</title>
+  <title>MVPPUSHBS - Tempo real</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f7a36" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="MVPPUSHBS" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="manifest.webmanifest?v=mvppushbs2" />
+  <link rel="icon" href="pushbus-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="realtime-pontos.css" />
+  <link rel="stylesheet" href="realtime-pontos.css?v=mvppushbs2" />
+  <link rel="stylesheet" href="nav.css?v=mvppushbs2" />
 </head>
 <body>
   <header class="topbar">
     <div class="title-block">
-      <p class="eyebrow">Monitoramento local</p>
+      <p class="eyebrow">MVPPUSHBS</p>
       <h1>&Ocirc;nibus em tempo real por ponto</h1>
       <span>Posi&ccedil;&atilde;o real do ve&iacute;culo e mensagens de passagem por geofence.</span>
     </div>
@@ -84,6 +92,7 @@
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="realtime-pontos.js" defer></script>
+  <script src="realtime-pontos.js?v=mvppushbs2" defer></script>
+  <script src="nav.js?v=mvppushbs2" defer></script>
 </body>
 </html>

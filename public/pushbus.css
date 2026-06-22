@@ -95,6 +95,13 @@ button.ghost,
   gap: 12px;
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .route-header {
   grid-template-columns: auto 1fr auto;
 }
@@ -403,7 +410,7 @@ button.ghost,
   z-index: 1;
   min-height: 58px;
   display: grid;
-  grid-template-columns: 50px 70px minmax(0, 1fr) auto;
+  grid-template-columns: 50px minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
 }
@@ -434,16 +441,6 @@ button.ghost,
 .stop-row.current .stop-dot {
   border: 7px solid var(--green);
   box-shadow: 0 0 0 10px rgba(16, 136, 61, .18), 0 0 0 20px rgba(16, 136, 61, .08);
-}
-
-.stop-row .time {
-  color: var(--muted);
-  font-weight: 800;
-}
-
-.stop-row.done .time,
-.stop-row.current .time {
-  color: var(--green-dark);
 }
 
 .stop-name {
@@ -591,11 +588,11 @@ button.ghost,
   }
 
   .stop-row {
-    grid-template-columns: 48px 62px minmax(0, 1fr);
+    grid-template-columns: 48px minmax(0, 1fr);
   }
 
   .status-badge {
-    grid-column: 3;
+    grid-column: 2;
     justify-self: start;
   }
 }

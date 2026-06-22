@@ -39,7 +39,7 @@ O arquivo `.env` real permanece fora do Git. O repositorio versiona apenas `.env
 | `npm ci` | OK, 71 pacotes instalados, 0 vulnerabilidades |
 | `npm start` | OK, servidor na porta 3000 |
 | `GET /api/health` | HTTP 200, `ok=true`, configuracao completa |
-| `GET /` | HTTP 200, titulo `PushBus V0.0.1` |
+| `GET /` | HTTP 200, titulo `MVPPUSHBS` |
 | `GET /linha-01a-pontos.html` | HTTP 200 |
 | `GET /realtime-pontos.html` | HTTP 200 |
 | Browser: selecionar Linha 01A | OK, exibiu acompanhamento, veiculo e 12 pontos |
@@ -82,7 +82,30 @@ Comportamento esperado:
 - Mantem os mesmos pontos da linha 01A.
 - Permite colocar um onibus em foco pelo select.
 - Permite colocar um onibus em foco com duplo clique rapido no marcador do mapa.
+- Permite voltar para a opcao `Todos os onibus` e enquadrar todos os marcadores na tela.
 - Todos os veiculos, selecionados ou nao, geram mensagem ao entrar no raio de um ponto.
+
+Incremento posterior em `feature/mvppushbs-app-shell`:
+
+- App renomeado para `MVPPUSHBS` no manifesto e nos metadados.
+- Menu responsivo tipo sanduiche adicionado em todas as paginas.
+- Registro de service worker feito em todas as paginas pelo menu compartilhado.
+- Botao `Ativar push` adicionado na tela inicial.
+- Horarios individuais dos pontos removidos da linha do tempo da tela inicial.
+- Assets locais versionados com `?v=mvppushbs2` para evitar que um service worker antigo entregue JS/CSS desatualizado.
+- Service worker atualizado para `mvppushbs-v0-0-3-shell`.
+
+Validacao final da branch `feature/mvppushbs-app-shell` em Docker:
+
+- `docker compose up -d --build`: OK, container `healthy`.
+- `npm run smoke`: OK em `/api/health`, `/`, `/mapa.html`, `/linha-01a-pontos.html`, `/realtime-pontos.html`, `/manifest.webmanifest` e `/sw.js`.
+- Tela inicial: titulo `MVPPUSHBS`, menu com Inicio/Mapa/Linha 01A/Tempo real, manifesto carregado e botao `Ativar push`.
+- Tela inicial apos selecionar Linha 01A: 12 pontos renderizados e 0 elementos de horario individual na linha do tempo.
+- Mapa: opcao inicial `Todos os onibus`, 25 marcadores, 25 veiculos, 12 pontos e 0 marcador em foco.
+- Mapa apos selecionar um onibus: 1 marcador em foco.
+- Mapa apos voltar para `Todos os onibus`: foco limpo, 25 marcadores visiveis e resumo `Todos os onibus no mapa`.
+- Linha 01A e Tempo real: menu responsivo, manifesto e mapa carregados.
+- Erros novos de console nas validacoes filtradas por timestamp: 0.
 
 Validacao local em Docker:
 

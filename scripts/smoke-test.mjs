@@ -4,12 +4,12 @@ const baseUrl = (process.env.SMOKE_BASE_URL || "http://127.0.0.1:3000").replace(
 const timeoutMs = Number(process.env.SMOKE_TIMEOUT_MS || 10000);
 
 const pageChecks = [
-  { path: "/", title: "PushBus V0.0.1" },
-  { path: "/mapa.html", title: "Mapa - Todos os onibus" },
-  { path: "/linha-01a-pontos.html", title: "Linha 01A - Pontos de Onibus" },
-  { path: "/realtime-pontos.html", title: "&Ocirc;nibus em tempo real por ponto" },
-  { path: "/manifest.webmanifest", contains: "PushBus" },
-  { path: "/sw.js", contains: "pushbus-v0-0-1-flow-mapa" }
+  { path: "/", title: "MVPPUSHBS" },
+  { path: "/mapa.html", title: "MVPPUSHBS - Mapa" },
+  { path: "/linha-01a-pontos.html", title: "MVPPUSHBS - Linha 01A" },
+  { path: "/realtime-pontos.html", title: "MVPPUSHBS - Tempo real" },
+  { path: "/manifest.webmanifest", contains: "MVPPUSHBS" },
+  { path: "/sw.js", contains: "mvppushbs-v0-0-3-shell" }
 ];
 
 async function request(path) {

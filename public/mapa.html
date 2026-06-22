@@ -2,16 +2,24 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <title>Mapa - Todos os onibus</title>
+  <title>MVPPUSHBS - Mapa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f7a36" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="MVPPUSHBS" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="manifest.webmanifest?v=mvppushbs2" />
+  <link rel="icon" href="pushbus-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="linha-01a-pontos.css" />
-  <link rel="stylesheet" href="mapa.css" />
+  <link rel="stylesheet" href="linha-01a-pontos.css?v=mvppushbs2" />
+  <link rel="stylesheet" href="mapa.css?v=mvppushbs2" />
+  <link rel="stylesheet" href="nav.css?v=mvppushbs2" />
 </head>
 <body>
   <header class="topbar">
     <div class="title-block">
-      <p class="eyebrow">Prototipo PushBus</p>
+      <p class="eyebrow">MVPPUSHBS</p>
       <h1>Mapa de todos os onibus</h1>
       <span>Mostra os mesmos pontos da linha 01A e todos os veiculos monitorados, mesmo sem linha relacionada na escalacao.</span>
     </div>
@@ -86,7 +94,8 @@
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="pushbus-data.js"></script>
-  <script src="mapa.js" defer></script>
+  <script src="pushbus-data.js?v=mvppushbs2"></script>
+  <script src="mapa.js?v=mvppushbs2" defer></script>
+  <script src="nav.js?v=mvppushbs2" defer></script>
 </body>
 </html>

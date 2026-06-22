@@ -1,7 +1,7 @@
 {
-  "name": "PushBus V0.0.1",
-  "short_name": "PushBus",
-  "description": "Acompanhamento de linhas, carros e pontos de onibus por geofence.",
+  "name": "MVPPUSHBS",
+  "short_name": "MVPPUSHBS",
+  "description": "MVP para acompanhamento de onibus, pontos e mensagens por geofence.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

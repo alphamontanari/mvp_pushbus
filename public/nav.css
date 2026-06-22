@@ -1,0 +1,112 @@
+.app-menu {
+  position: fixed;
+  z-index: 1200;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.topbar,
+.screen-header {
+  padding-right: 64px;
+}
+
+.app-menu-toggle {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(11, 90, 42, .24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .96);
+  color: #0b5a2a;
+  box-shadow: 0 12px 26px rgba(23, 32, 51, .16);
+  cursor: pointer;
+}
+
+.app-menu-toggle span,
+.app-menu-toggle::before,
+.app-menu-toggle::after {
+  content: "";
+  width: 21px;
+  height: 2px;
+  display: block;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.app-menu-toggle {
+  gap: 5px;
+}
+
+.app-menu-panel {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: min(280px, calc(100vw - 24px));
+  padding: 10px;
+  border: 1px solid #d8e2dd;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(23, 32, 51, .18);
+}
+
+.app-menu[aria-expanded="false"] .app-menu-panel {
+  display: none;
+}
+
+.app-menu-title {
+  display: block;
+  padding: 8px 9px 10px;
+  color: #0b5a2a;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.app-menu-link,
+.app-menu-install {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: left;
+  text-decoration: none;
+}
+
+.app-menu-link:hover,
+.app-menu-link.active,
+.app-menu-install:hover {
+  background: #eef8f1;
+  color: #0b5a2a;
+}
+
+.app-menu-install {
+  margin-top: 6px;
+  border-top: 1px solid #e7efeb;
+  cursor: pointer;
+}
+
+.app-menu-install.hidden {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .app-menu {
+    top: max(10px, env(safe-area-inset-top));
+    right: max(10px, env(safe-area-inset-right));
+  }
+
+  .app-menu-toggle {
+    width: 42px;
+    height: 42px;
+  }
+}

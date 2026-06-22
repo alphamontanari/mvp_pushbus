@@ -17,7 +17,8 @@ const state = {
   resetTimer: null,
   inFlight: false,
   currentScreen: "lines",
-  deferredInstallPrompt: null
+  deferredInstallPrompt: null,
+  notificationsEnabled: false
 };
 
 const els = {
@@ -37,6 +38,7 @@ const els = {
   refreshInterval: document.querySelector("#refreshInterval"),
   refreshButton: document.querySelector("#refreshButton"),
   installButton: document.querySelector("#installButton"),
+  notifyButtons: document.querySelectorAll("[data-notify-button]"),
   startTime: document.querySelector("#startTime"),
   serviceText: document.querySelector("#serviceText"),
   timeline: document.querySelector("#timeline"),
@@ -364,7 +366,6 @@ function renderTimeline() {
     return `
       <article class="stop-row ${done ? "done" : ""} ${current ? "current" : ""}">
         <span class="stop-dot"></span>
-        <span class="time">${escapeHtml(stop.time || "--:--")}</span>
         <span class="stop-name">
           ${escapeHtml(stop.name)}
           <span class="stop-meta">${escapeHtml(stop.type)} - ${escapeHtml(stop.street || stop.direction || "")}</span>
@@ -430,6 +431,17 @@ function addPassageEvent(vehicle, line, nearby) {
 
   if (state.events.length > 50) state.events.pop();
   renderEvents();
+  sendBrowserNotification(title, detail, `${line.id}-${nearby.stop.id}`);
+}
+
+function sendBrowserNotification(title, body, tag) {
+  if (!state.notificationsEnabled || !("Notification" in window)) return;
+  if (Notification.permission !== "granted") return;
+
+  new Notification(title, {
+    body,
+    tag
+  });
 }
 
 function renderVehicleStatus(vehicle, line, nearby) {
@@ -551,6 +563,24 @@ function registerPwa() {
   });
 }
 
+async function enableNotifications() {
+  if (!("Notification" in window)) {
+    els.connectionPill.textContent = "Sem push";
+    els.connectionPill.classList.add("warn");
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  state.notificationsEnabled = permission === "granted";
+
+  els.notifyButtons.forEach(button => {
+    button.textContent = state.notificationsEnabled ? "Push ativo" : "Push bloqueado";
+  });
+
+  els.connectionPill.textContent = state.notificationsEnabled ? "Push ativo" : "Push bloqueado";
+  els.connectionPill.classList.toggle("warn", !state.notificationsEnabled);
+}
+
 els.lineSearch.addEventListener("input", renderLineBrowser);
 els.backButton.addEventListener("click", () => {
   showScreen("lines");
@@ -562,6 +592,9 @@ els.vehicleSelect.addEventListener("change", () => {
 });
 els.refreshInterval.addEventListener("change", setupTimer);
 els.refreshButton.addEventListener("click", refreshPositions);
+els.notifyButtons.forEach(button => {
+  button.addEventListener("click", enableNotifications);
+});
 els.installButton.addEventListener("click", async () => {
   if (!state.deferredInstallPrompt) return;
   state.deferredInstallPrompt.prompt();
