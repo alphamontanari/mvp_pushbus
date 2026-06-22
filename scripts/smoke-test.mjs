@@ -5,10 +5,11 @@ const timeoutMs = Number(process.env.SMOKE_TIMEOUT_MS || 10000);
 
 const pageChecks = [
   { path: "/", title: "PushBus V0.0.1" },
+  { path: "/mapa.html", title: "Mapa - Todos os onibus" },
   { path: "/linha-01a-pontos.html", title: "Linha 01A - Pontos de Onibus" },
   { path: "/realtime-pontos.html", title: "&Ocirc;nibus em tempo real por ponto" },
   { path: "/manifest.webmanifest", contains: "PushBus" },
-  { path: "/sw.js", contains: "pushbus-v0-0-1-flow" }
+  { path: "/sw.js", contains: "pushbus-v0-0-1-flow-mapa" }
 ];
 
 async function request(path) {

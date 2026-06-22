@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Mapa - Todos os onibus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="linha-01a-pontos.css" />
+  <link rel="stylesheet" href="mapa.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-block">
+      <p class="eyebrow">Prototipo PushBus</p>
+      <h1>Mapa de todos os onibus</h1>
+      <span>Mostra os mesmos pontos da linha 01A e todos os veiculos monitorados, mesmo sem linha relacionada na escalacao.</span>
+    </div>
+
+    <div class="controls">
+      <button id="btnLogin">Autenticar</button>
+      <button id="btnRefresh" class="primary">Atualizar</button>
+      <button id="btnNotify">Ativar notificacoes</button>
+      <button id="btnFit">Ver mapa</button>
+      <label>
+        Auto
+        <select id="refreshInterval">
+          <option value="0">Off</option>
+          <option value="5000">5s</option>
+          <option value="10000">10s</option>
+          <option value="20000" selected>20s</option>
+          <option value="60000">60s</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="points-panel" aria-label="Pontos e selecao de onibus">
+      <section class="status-strip">
+        <div>
+          <strong id="vehicleCount">0</strong>
+          <span>onibus</span>
+        </div>
+        <div>
+          <strong id="pointCount">12</strong>
+          <span>pontos</span>
+        </div>
+        <div>
+          <strong id="messageCount">0</strong>
+          <span>mensagens</span>
+        </div>
+      </section>
+
+      <div id="status" class="status">Carregando todos os onibus monitorados...</div>
+
+      <section class="selector-card">
+        <label for="vehicleSelect">Onibus em foco</label>
+        <select id="vehicleSelect">
+          <option value="">Aguardando veiculos...</option>
+        </select>
+        <p id="selectedVehicleSummary">Escolha pelo combo ou de duplo clique em um onibus no mapa.</p>
+      </section>
+
+      <div class="panel-heading">
+        <h2>Pontos da linha 01A</h2>
+        <span id="updatedAt">Sem atualizacao</span>
+      </div>
+      <div id="pointList" class="point-list"></div>
+    </aside>
+
+    <section class="map-area" aria-label="Mapa dos pontos e todos os veiculos">
+      <div id="map"></div>
+      <div class="map-summary">
+        <strong id="eventHeadline">Aguardando posicoes dos onibus</strong>
+        <span id="eventDetail">Todos os veiculos retornados pela API geram mensagem ao entrar no raio dos pontos.</span>
+      </div>
+    </section>
+
+    <aside class="events-panel" aria-label="Mensagens disparadas">
+      <div class="panel-heading">
+        <h2>Mensagens</h2>
+        <span>Passagem por geofence</span>
+      </div>
+      <div id="eventList" class="event-list"></div>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="pushbus-data.js"></script>
+  <script src="mapa.js" defer></script>
+</body>
+</html>

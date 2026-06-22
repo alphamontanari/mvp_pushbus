@@ -1,0 +1,76 @@
+.selector-card {
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdfb;
+}
+
+.selector-card label,
+.selector-card p {
+  display: block;
+  margin: 0;
+}
+
+.selector-card label {
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.selector-card select {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.selector-card p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.point-card.focused {
+  border-color: var(--blue);
+  background: #eff6ff;
+}
+
+.point-message b {
+  color: var(--blue);
+}
+
+.all-vehicle-pin {
+  background: #2563eb;
+}
+
+.all-vehicle-pin.no-line {
+  background: #7c3aed;
+}
+
+.all-vehicle-pin.selected {
+  min-width: 52px;
+  height: 40px;
+  border-color: #facc15;
+  background: #0f7a36;
+  box-shadow: 0 0 0 5px rgba(250, 204, 21, .26), 0 8px 20px rgba(23, 32, 51, .36);
+  transform: translateY(-3px);
+}
+
+.vehicle-popup-note {
+  display: block;
+  margin-top: 6px;
+  color: #627083;
+  font-size: 12px;
+}
+
+.badge.selected {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+@media (max-width: 820px) {
+  .selector-card {
+    margin-bottom: 12px;
+  }
+}

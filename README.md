@@ -85,6 +85,7 @@ Nao coloque usuario, senha ou token no JavaScript publico.
 | --- | --- | --- |
 | PushBus V0.0.1 | `http://localhost:3000/` | App principal instalavel no celular. Abre na lista de linhas e, ao selecionar uma linha, exibe a progressao dos pontos e o onibus/carro monitorado. |
 | PushBus V0.0.1 | `http://localhost:3000/index.html` | Mesma tela principal, acessada pelo arquivo HTML diretamente. |
+| Mapa de todos os onibus | `http://localhost:3000/mapa.html` | Mapa com os mesmos pontos da linha 01A, mas consultando todos os veiculos padrao sem filtro de linha. Permite focar um onibus pelo select ou por duplo clique no marcador, e qualquer onibus gera mensagem ao passar no ponto. |
 | Linha 01A por ponto | `http://localhost:3000/linha-01a-pontos.html` | Tela com pontos da linha 01A, geofence, mapa dos veiculos filtrados e mensagens de entrada/saida dos pontos. |
 | Onibus em tempo real por ponto | `http://localhost:3000/realtime-pontos.html` | Nova tela com um veiculo em tempo real, pontos no mapa, circulos de geofence e mensagem `Passou no ponto X` quando o veiculo entra no raio do ponto. |
 
@@ -98,6 +99,8 @@ http://localhost:3000/pushbus.js
 http://localhost:3000/pushbus-data.js
 http://localhost:3000/manifest.webmanifest
 http://localhost:3000/sw.js
+http://localhost:3000/mapa.css
+http://localhost:3000/mapa.js
 http://localhost:3000/linha-01a-pontos.css
 http://localhost:3000/linha-01a-pontos.js
 http://localhost:3000/realtime-pontos.css
@@ -209,6 +212,15 @@ Corpo usado pela pagina da linha 01A:
 ```json
 {
   "lineCode": "01A"
+}
+```
+
+Corpo usado pela pagina `mapa.html` para consultar todos os veiculos padrao sem filtro de linha:
+
+```json
+{
+  "lines": [],
+  "vehicles": []
 }
 ```
 

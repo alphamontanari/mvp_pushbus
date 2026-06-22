@@ -1,10 +1,13 @@
-const CACHE_NAME = "pushbus-v0-0-1-flow";
+const CACHE_NAME = "pushbus-v0-0-1-flow-mapa";
 const SHELL_ASSETS = [
   "/",
   "/index.html",
+  "/mapa.html",
   "/pushbus.css",
   "/pushbus.js",
   "/pushbus-data.js",
+  "/mapa.css",
+  "/mapa.js",
   "/manifest.webmanifest",
   "/pushbus-icon.svg",
   "/icons/icon-192.png",

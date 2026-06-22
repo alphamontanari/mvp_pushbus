@@ -23,6 +23,7 @@ O arquivo `.env` real permanece fora do Git. O repositorio versiona apenas `.env
 - `.dockerignore` excluindo segredos, dependencias, compactados e artefatos locais.
 - `scripts/smoke-test.mjs` para validar endpoints e paginas principais.
 - README atualizado com execucao Docker e comandos de operacao.
+- Pagina `mapa.html` adicionada para visualizar todos os onibus nos pontos da linha 01A, com foco por select ou duplo clique no marcador.
 
 ## Ajustes de runtime
 
@@ -64,6 +65,36 @@ O arquivo `.env` real permanece fora do Git. O repositorio versiona apenas `.env
 | Browser em Docker: fluxo Linha 01A | OK |
 | Browser em Docker: telas com mapa | OK em `linha-01a-pontos.html` e `realtime-pontos.html` |
 | Console do browser apos teste filtrado por timestamp | 0 erros novos |
+
+## Incremento: pagina mapa
+
+Adicionado depois da primeira preparacao Docker:
+
+- `public/mapa.html`
+- `public/mapa.css`
+- `public/mapa.js`
+
+A pagina consulta `/api/vehicles/positions` com `lines: []` e `vehicles: []`, deixando o backend usar a lista padrao de veiculos sem aplicar `lineCode`. Isso permite localizar onibus mesmo quando a escalacao nao relaciona corretamente `001A`, `01A` ou `1A`.
+
+Comportamento esperado:
+
+- Plota todos os veiculos retornados pela API.
+- Mantem os mesmos pontos da linha 01A.
+- Permite colocar um onibus em foco pelo select.
+- Permite colocar um onibus em foco com duplo clique rapido no marcador do mapa.
+- Todos os veiculos, selecionados ou nao, geram mensagem ao entrar no raio de um ponto.
+
+Validacao local em Docker:
+
+- `npm run smoke`: OK, incluindo `/mapa.html`.
+- Browser em `http://127.0.0.1:3000/mapa.html`: OK.
+- Veiculos plotados na validacao: 25.
+- Opcoes no select de onibus: 25.
+- Pontos renderizados: 12.
+- Marcador em foco apos selecao: 1.
+- Duplo clique no marcador em foco: OK, popup aberto e onibus mantido em foco.
+- Mensagens de passagem geradas na tela durante a validacao: 4.
+- Erros novos de console apos validacao filtrada por timestamp: 0.
 
 Observacao: durante a troca entre Node local e Docker, uma aba antiga que continuou aberta registrou erros `Failed to fetch` enquanto a porta 3000 estava sem servidor. A validacao final filtrada por timestamp no container nao apresentou erros novos.
 
