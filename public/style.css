@@ -1,0 +1,140 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #172033;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  background: #f5f7fb;
+}
+
+.sidebar {
+  padding: 18px;
+  overflow: auto;
+  background: #ffffff;
+  border-right: 1px solid #dde3ee;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+h2 {
+  font-size: 16px;
+  margin-top: 22px;
+}
+
+.muted {
+  color: #697386;
+  margin-top: 6px;
+}
+
+.actions {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+button, select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #c9d3e3;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+}
+
+button {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.status {
+  padding: 10px;
+  background: #f0f3f8;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #39465e;
+  line-height: 1.35;
+}
+
+.vehicle-list {
+  display: grid;
+  gap: 10px;
+}
+
+.vehicle-card {
+  border: 1px solid #dde3ee;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  background: #fff;
+}
+
+.vehicle-card:hover {
+  background: #f8fbff;
+}
+
+.vehicle-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.vehicle-meta {
+  font-size: 13px;
+  margin-top: 5px;
+  color: #526077;
+  line-height: 1.35;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #edf2f7;
+  font-size: 12px;
+  color: #344055;
+  white-space: nowrap;
+}
+
+#map {
+  height: 100vh;
+}
+
+.bus-marker {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #0f4f8a;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  border: 3px solid white;
+  box-shadow: 0 3px 12px rgba(0,0,0,.35);
+  font-size: 12px;
+}
+
+@media (max-width: 800px) {
+  body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 42vh 58vh;
+  }
+
+  .sidebar {
+    order: 2;
+    border-right: 0;
+    border-top: 1px solid #dde3ee;
+  }
+
+  #map {
+    order: 1;
+    height: 42vh;
+  }
+}

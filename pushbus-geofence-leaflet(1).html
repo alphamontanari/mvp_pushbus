@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PushBus - KML/KMZ + Geofence</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root{--green:#16833a;--green2:#20b64b;--ink:#0c2d36;--muted:#66737a;--line:#dbe5e8;--blue:#f3f9ff}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:linear-gradient(135deg,#f7fbff,#e7f1ed 55%,#dfeaf1)}
+    .app{min-height:100vh;display:grid;grid-template-columns:minmax(370px,470px) minmax(0,1fr);gap:18px;padding:18px}
+    .left{display:flex;flex-direction:column;gap:14px;align-items:center;min-width:0}
+    .toolbar{width:100%;max-width:440px;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.94);box-shadow:0 12px 26px rgba(15,23,42,.08)}
+    .toolbar h2{margin:0 0 8px;color:#064f27;font-size:16px}.toolbar p{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.35}
+    .upload{display:grid;grid-template-columns:1fr auto;gap:8px}.file-name{min-height:40px;display:flex;align-items:center;padding:0 12px;border:1px dashed #97b7c4;border-radius:10px;background:white;color:#31515b;font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}input[type=file]{display:none}
+    button{min-height:40px;border:0;border-radius:10px;padding:0 12px;background:white;color:#12333b;font-weight:800;cursor:pointer;box-shadow:0 9px 18px rgba(15,23,42,.12)}button.primary{background:var(--green);color:white}
+    .phone{width:100%;max-width:440px;padding:14px;border-radius:46px;background:linear-gradient(145deg,#050505,#242424);box-shadow:inset 0 0 0 2px #4a4a4a,inset 0 0 0 6px #111,0 28px 70px rgba(0,0,0,.28)}
+    .screen{position:relative;height:820px;overflow:hidden;border-radius:34px;background:radial-gradient(circle at 70% 32%,rgba(20,131,58,.08),transparent 26%),linear-gradient(#fff,#fbfefe);border:1px solid #222}
+    .island{position:absolute;top:11px;left:50%;width:118px;height:35px;transform:translateX(-50%);border-radius:22px;background:#050505}
+    .status{height:50px;padding:15px 28px 0;display:flex;justify-content:space-between;font-weight:800;color:#000}.battery{padding:1px 4px;border-radius:5px;background:#111;color:#fff;font-size:12px}
+    .content{height:calc(100% - 50px);padding:18px 24px 22px;overflow:auto}.card{border-radius:14px;background:rgba(255,255,255,.9);box-shadow:0 12px 24px rgba(15,23,42,.08)}
+    .route-card{padding:16px 18px;border:1px solid #c8dff5;background:linear-gradient(135deg,var(--blue),#fff)}.route-card h1{margin:0 0 12px;color:#064f27;font-size:22px}.route-card p{margin:6px 0;line-height:1.35;font-size:15px}
+    .alert{margin-top:14px;padding:16px;display:grid;grid-template-columns:76px 1fr;gap:14px;align-items:center;border:1px solid #2fb45d;background:linear-gradient(110deg,#f0fff4,#fff)}
+    .bus-bubble{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;color:white;background:radial-gradient(circle,var(--green2) 0 45%,rgba(32,182,75,.25) 46% 100%)}
+    .bus-svg{width:38px;height:38px}.alert-small{margin-bottom:8px;color:#0b6a2d;font-size:14px;font-weight:800;line-height:1.25}.alert-main{font-size:18px;line-height:1.28}.alert-main strong{display:block;margin-top:4px;color:#0b6a2d;font-size:25px;line-height:1.16}
+    .meta{margin:16px 0 14px;display:grid;gap:9px;font-size:15px}.meta-row{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center}.meta i{font-style:normal;color:#3572d8;font-weight:900;text-align:center}.meta b,.blue{color:#356ed1}
+    .timeline-card{padding:16px;border:1px solid var(--line)}.timeline-card h2{margin:0 0 14px;font-size:17px}.timeline{position:relative}.timeline:before{content:"";position:absolute;left:22px;top:16px;bottom:16px;width:5px;border-radius:999px;background:linear-gradient(180deg,var(--green) 0 var(--progress,0%),#aeb4b8 var(--progress,0%) 100%)}
+    .stop-row{position:relative;z-index:1;min-height:50px;display:grid;grid-template-columns:56px 62px 1fr auto;gap:8px;align-items:center;font-size:14px}.marker{width:25px;height:25px;margin-left:10px;border-radius:50%;border:3px solid #9da4a9;background:white}.done .marker{display:grid;place-items:center;border-color:var(--green);background:var(--green);color:white;font-weight:900}.done .marker:after{content:"✓"}.current .marker{border:7px solid var(--green2);box-shadow:0 0 0 9px rgba(32,182,75,.18),0 0 0 18px rgba(32,182,75,.08)}.terminal .marker{border-color:var(--green);background:#063}.time{color:#67727b;font-weight:800}.done .time,.current .time{color:var(--green)}.stop-name{line-height:1.25;font-weight:800;color:#17313a}.pill{padding:7px 10px;border-radius:999px;border:1px solid #2fb45d;color:var(--green);background:#f1fff5;font-size:12px;font-weight:900;white-space:nowrap}
+    .legend{margin-top:14px;padding:14px 16px;border:1px solid #edf0f2}.legend strong{display:block;margin-bottom:12px;font-size:14px}.legend-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:12px}.legend-item{display:flex;align-items:center;gap:7px}.leg{width:20px;height:20px;border-radius:50%;border:3px solid var(--green);background:white}.leg.full{background:var(--green);box-shadow:inset 0 0 0 3px #24b448}.leg.int{box-shadow:inset 0 0 0 4px white;background:var(--green)}
+    .homebar{position:absolute;bottom:10px;left:50%;width:132px;height:5px;transform:translateX(-50%);border-radius:999px;background:#000}
+    .map-wrap{position:relative;min-width:0;min-height:calc(100vh - 36px);overflow:hidden;border-radius:18px;background:#e8f1f4;box-shadow:0 18px 42px rgba(31,41,55,.16)}#map{width:100%;height:100%;min-height:calc(100vh - 36px)}
+    .map-panel{position:absolute;z-index:700;top:16px;left:16px;width:min(500px,calc(100% - 32px));padding:13px 14px;border:1px solid rgba(219,229,232,.8);border-radius:14px;background:rgba(255,255,255,.94);box-shadow:0 12px 26px rgba(15,23,42,.13);backdrop-filter:blur(8px)}.map-panel strong{display:block;color:#064f27;margin-bottom:5px}.map-panel span{display:block;color:var(--muted);font-size:12px;line-height:1.35}
+    .map-controls{position:absolute;z-index:700;right:16px;bottom:16px;display:grid;gap:8px;width:180px}.bus-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;border:3px solid white;color:white;background:var(--green);box-shadow:0 8px 18px rgba(0,0,0,.28);font-size:11px;font-weight:900}.stop-icon{width:22px;height:22px;border-radius:50%;border:5px solid var(--green);background:white;box-shadow:0 4px 12px rgba(22,131,58,.26)}
+    @media(max-width:1050px){.app{grid-template-columns:1fr}.map-wrap,#map{min-height:660px}.screen{height:780px}}@media(max-width:520px){.app{padding:10px}.phone{padding:8px;border-radius:34px}.screen{height:760px;border-radius:28px}.content{padding:14px}.alert{grid-template-columns:58px 1fr}.bus-bubble{width:56px;height:56px}.stop-row{grid-template-columns:44px 54px 1fr}.pill{grid-column:3;justify-self:start}.legend-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="left">
+      <div class="toolbar">
+        <h2>Trajeto real por KML/KMZ</h2>
+        <div class="upload"><label class="file-name" for="routeFile" id="fileName">Enviar arquivo .kml ou .kmz</label><button id="chooseFileBtn">Selecionar</button><input id="routeFile" type="file" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz"></div>
+        <p id="routeStatus">A página abre com rota simplificada. Ao enviar KML/KMZ, o traçado e a animação passam a usar o arquivo real. A camada padrão foi trocada para CARTO para evitar bloqueio 403 do OpenStreetMap em arquivo local.</p>
+      </div>
+      <div class="phone"><div class="screen">
+        <div class="island"></div><div class="status"><span id="phoneClock">05:50</span><span>▮▮▮ Wi‑Fi <span class="battery">100</span></span></div>
+        <div class="content">
+          <section class="route-card card"><h1>LINHA 01A</h1><p><b>Partida:</b> ESTÂNCIA 4 IRMÃOS</p><p><b>Chegada:</b> MEIA LUA RODOVIÁRIA</p></section>
+          <section class="alert card"><div class="bus-bubble"><svg class="bus-svg" viewBox="0 0 48 48" fill="none"><rect x="10" y="7" width="28" height="31" rx="5" fill="currentColor"/><rect x="14" y="12" width="20" height="10" rx="1.5" fill="white"/><circle cx="17" cy="34" r="3" fill="white"/><circle cx="31" cy="34" r="3" fill="white"/><path d="M13 25h22" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></div><div><div class="alert-small" id="eventText">Ônibus iniciou a viagem em Estância 4 Irmãos</div><div class="alert-main">Tempo estimado até<strong id="etaText">Meia Lua Rodoviária: calculando...</strong></div></div></section>
+          <section class="meta"><div class="meta-row"><i>□</i><span>Dia de semana · Saída: <b>05:50</b></span></div><div class="meta-row"><i>↔</i><span>Serviço: <span class="blue">BAIRRO → CENTRO</span></span></div><div class="meta-row"><i>☷</i><span>Tipo de Itinerário: Itinerário normal</span></div></section>
+          <section class="timeline-card card"><h2>Trajeto (tempo estimado)</h2><div class="timeline" id="timeline"></div></section>
+          <section class="legend card"><strong>Legenda</strong><div class="legend-grid"><div class="legend-item"><span class="leg full"></span>Terminais</div><div class="legend-item"><span class="leg int"></span>Pontos de integração</div><div class="legend-item"><span class="leg"></span>Pontos de passagem</div></div></section>
+        </div><div class="homebar"></div>
+      </div></div>
+    </section>
+    <section class="map-wrap"><div id="map"></div><div class="map-panel"><strong>Mapa de Itapetininga com geofence</strong><span>Agora a base padrão não usa `tile.openstreetmap.org`, evitando o bloqueio 403 de uso local. O seletor de camadas fica no canto superior direito do mapa.</span></div><div class="map-controls"><button class="primary" id="toggleBtn">Iniciar</button><button id="resetBtn">Reiniciar</button><button id="speedBtn">Velocidade 1x</button><button id="fitBtn">Ver percurso</button></div></section>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    const stops=[
+      ["Hospital Unimed","HOSPITAL UNIMED","HOSPITAL UNIMED - AV. WENCESLAU BRAZ - SENTIDO CENTRO","ABRIGO",-23.56055431668441,-48.01244525902669],
+      ["Cohab Estância 4 Irmãos","COHAB ESTÂNCIA 4 IRMÃOS","COHAB ESTÂNCIA 4 IRMÃOS - ROTATÓRIA - SENTIDO CENTRO","ABRIGO",-23.56461184211462,-48.01586334332148],
+      ["Igreja Nossa Senhora do Carmo","IGREJA NOSSA SENHORA DO CARMO","IGREJA NOSSA SENHORA DO CARMO - AV. WENCESLAU BRAZ - SENTIDO CENTRO","ABRIGO",-23.565261657312014,-48.017521891254425],
+      ["Prefeitura Municipal","PREFEITURA MUNICIPAL","PREFEITURA MUNICIPAL - R. CARLOS CARDOSO - SENTIDO CENTRO","ABRIGO",-23.570429930319264,-48.02053370655511],
+      ["Praça dos Três Poderes","PRAÇA DOS TRÊS PODERES","PRAÇA DOS TRÊS PODERES - R. CARLOS CARDOSO - SENTIDO CENTRO","ABRIGO",-23.57174793791974,-48.022839449607304],
+      ["Residencial Cambará","RESIDENCIAL CAMBARÁ","RESIDENCIAL CAMBARÁ - AV. WENCESLAU BRAZ - SENTIDO CENTRO","ABRIGO",-23.572341683943222,-48.02627407946567],
+      ["Igreja São João Batista","IGREJA SÃO JOÃO BATISTA","IGREJA SÃO JOÃO BATISTA - R. ANTÔNIO AVELINO DA COSTA - SENTIDO CENTRO","ABRIGO",-23.572860341973797,-48.030278023827044],
+      ["Vila Aurora","VILA AURORA","VILA AURORA - R. ANTÔNIO ANUNCIATO - SENTIDO CENTRO","PLACA",-23.575161788526295,-48.033304907330695],
+      ["Edifício Portinari","EDIFÍCIO PORTINARI","EDIFÍCIO PORTINARI - R. ANTÔNIO ANUNCIATO - SENTIDO CENTRO","PLACA",-23.57694284963109,-48.03269856993608],
+      ["Parque da Lagoa","PARQUE DA LAGOA","PARQUE DA LAGOA - R. DR. COUTINHO - SENTIDO CENTRO","ABRIGO",-23.577943565893037,-48.033917897389706],
+      ["Vila Grace","VILA GRACE","VILA GRACE - R. SENADOR JOSÉ HERMÍRIO DE MORÃES - SENTIDO CENTRO","ABRIGO",-23.579379711422494,-48.033981114896186],
+      ["Meia Lua Rodoviária","MEIA LUA RODOVIÁRIA","MEIA LUA RODOVIÁRIA - R. SATURNINO GONZALES - SENTIDO CENTRO","INTEGRAÇÃO",-23.581101124478643,-48.03227304173673]
+    ].map((s,i)=>({name:s[0],display:s[1],full:s[2],type:s[3],lat:s[4],lng:s[5],time:["05:50","05:53","05:55","05:58","06:00","06:03","06:05","06:07","06:09","06:11","06:13","06:15"][i],radiusEnter:42,radiusExit:70}));
+    let route=stops.map(s=>[s.lat,s.lng]);
+    const map=L.map("map",{zoomControl:false}).setView([-23.5716,-48.0252],14); L.control.zoom({position:"bottomleft"}).addTo(map);
+    const carto=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{maxZoom:20,subdomains:"abcd",attribution:"&copy; OpenStreetMap contributors &copy; CARTO"});
+    const esri=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Tiles &copy; Esri"});
+    const topo=L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{maxZoom:17,attribution:"Map data &copy; OpenStreetMap contributors, SRTM | OpenTopoMap"});
+    carto.addTo(map); L.control.layers({"CARTO Voyager":carto,"Esri Streets":esri,"OpenTopoMap":topo},null,{position:"topright"}).addTo(map);
+    const routeLine=L.polyline(route,{color:"#16833a",weight:6,opacity:.85,lineCap:"round",lineJoin:"round"}).addTo(map);
+    const traveledLine=L.polyline([route[0]],{color:"#20b64b",weight:5,opacity:.95,lineCap:"round",lineJoin:"round"}).addTo(map);
+    const busIcon=L.divIcon({className:"",html:"<div class='bus-icon'>BUS</div>",iconSize:[38,38],iconAnchor:[19,19]});
+    const stopIcon=L.divIcon({className:"",html:"<div class='stop-icon'></div>",iconSize:[22,22],iconAnchor:[11,11]});
+    const busMarker=L.marker(route[0],{icon:busIcon}).addTo(map); const stopLayers=L.layerGroup().addTo(map);
+    const $=id=>document.getElementById(id), timeline=$("timeline"), eventText=$("eventText"), etaText=$("etaText"), phoneClock=$("phoneClock"), toggleBtn=$("toggleBtn"), resetBtn=$("resetBtn"), speedBtn=$("speedBtn"), fitBtn=$("fitBtn"), routeFile=$("routeFile"), chooseFileBtn=$("chooseFileBtn"), fileName=$("fileName"), routeStatus=$("routeStatus");
+    let playing=false,speedIndex=0,segmentIndex=0,segmentProgress=0,expectedStopIndex=0,insideStop=false,currentPosition=route[0],traveled=[route[0]],lastFrame=null,simulatedMinutes=0; const speeds=[1,2,4,8];
+    function renderStops(){stopLayers.clearLayers();stops.forEach(s=>{L.circle([s.lat,s.lng],{radius:s.radiusExit,color:"#16833a",weight:1,fillColor:"#20b64b",fillOpacity:.09}).addTo(stopLayers);L.marker([s.lat,s.lng],{icon:stopIcon}).bindPopup(`<strong>${s.display}</strong><br>${s.full}<br>Tipo: ${s.type}`).addTo(stopLayers)})}
+    function renderTimeline(){const progress=stops.length<=1?0:(expectedStopIndex/(stops.length-1))*100;timeline.style.setProperty("--progress",`${Math.max(0,Math.min(100,progress))}%`);timeline.innerHTML=stops.map((s,i)=>{const status=i<expectedStopIndex?"done":i===expectedStopIndex?"current":"",terminal=i===0||s.type==="INTEGRAÇÃO"?"terminal":"",pill=i===expectedStopIndex?`<span class="pill">${insideStop?"Chegando":"Próximo ponto"}</span>`:"";return `<div class="stop-row ${status} ${terminal}"><span class="marker"></span><span class="time">${s.time}</span><span class="stop-name">${s.display}</span>${pill}</div>`}).join("")}
+    function fitRoute(){const b=L.latLngBounds(route);stops.forEach(s=>b.extend([s.lat,s.lng]));map.fitBounds(b,{padding:[36,36]})}
+    function toRad(v){return v*Math.PI/180} function dist(a,b){const R=6371000,dLat=toRad(b[0]-a[0]),dLng=toRad(b[1]-a[1]),lat1=toRad(a[0]),lat2=toRad(b[0]),x=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
+    function lerp(a,b,t){return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]} function remaining(i,p){let m=0;if(route[i+1])m+=dist(lerp(route[i],route[i+1],p),route[i+1]);for(let k=i+1;k<route.length-1;k++)m+=dist(route[k],route[k+1]);return m}
+    function updateClock(){const total=350+Math.floor(simulatedMinutes),h=String(Math.floor(total/60)).padStart(2,"0"),m=String(total%60).padStart(2,"0");phoneClock.textContent=`${h}:${m}`}
+    function updateEta(){const min=Math.max(1,Math.round(remaining(segmentIndex,segmentProgress)/450));etaText.textContent=`${stops.at(-1).display}: ${min} ${min===1?"minuto":"minutos"}`}
+    function handleGeofence(){const s=stops[expectedStopIndex];if(!s){playing=false;toggleBtn.textContent="Iniciar";eventText.textContent="Viagem concluída na Meia Lua Rodoviária";etaText.textContent="Chegada ao ponto final";return}const d=dist(currentPosition,[s.lat,s.lng]);if(!insideStop&&d<=s.radiusEnter){insideStop=true;eventText.textContent=`Ônibus chegando em ${s.name}`;etaText.textContent=`${s.display}: agora`;renderTimeline()} if(insideStop&&d>=s.radiusExit){const next=stops[expectedStopIndex+1];eventText.textContent=next?`Ônibus saiu de ${s.name} e segue para ${next.name}`:`Ônibus saiu de ${s.name}`;expectedStopIndex++;insideStop=false;renderTimeline();updateEta()}}
+    function reset(){playing=false;toggleBtn.textContent="Iniciar";segmentIndex=0;segmentProgress=0;expectedStopIndex=0;insideStop=false;currentPosition=route[0];traveled=[route[0]];simulatedMinutes=0;lastFrame=null;busMarker.setLatLng(route[0]);traveledLine.setLatLngs([route[0]]);eventText.textContent="Ônibus iniciou a viagem em Estância 4 Irmãos";etaText.textContent="Meia Lua Rodoviária: calculando...";updateClock();updateEta();renderTimeline()}
+    function animate(ts){if(!playing){lastFrame=ts;requestAnimationFrame(animate);return} if(lastFrame===null)lastFrame=ts;const delta=Math.min(64,ts-lastFrame);lastFrame=ts;segmentProgress+=delta*.00006*speeds[speedIndex];simulatedMinutes+=delta*.00018*speeds[speedIndex];updateClock();while(segmentProgress>=1&&segmentIndex<route.length-2){segmentProgress-=1;segmentIndex++;traveled.push(route[segmentIndex])} if(segmentIndex>=route.length-1){playing=false;toggleBtn.textContent="Iniciar";eventText.textContent="Viagem concluída";etaText.textContent="Chegada ao destino"}else{currentPosition=lerp(route[segmentIndex],route[segmentIndex+1],segmentProgress);busMarker.setLatLng(currentPosition);traveledLine.setLatLngs([...traveled,currentPosition]);handleGeofence();if(!insideStop)updateEta()} requestAnimationFrame(animate)}
+    function parseKml(text){const xml=new DOMParser().parseFromString(text,"application/xml");if(xml.querySelector("parsererror"))throw new Error("Não foi possível ler o KML.");const lines=[...xml.getElementsByTagNameNS("*","coordinates")].map(n=>n.textContent.trim().split(/\s+/).map(c=>{const [lng,lat]=c.split(",").map(Number);return Number.isFinite(lat)&&Number.isFinite(lng)?[lat,lng]:null}).filter(Boolean)).filter(a=>a.length>1);if(!lines.length)throw new Error("O arquivo não tem LineString com coordenadas suficientes.");return lines.sort((a,b)=>b.length-a.length)[0]}
+    async function readFile(file){const ext=file.name.toLowerCase().split(".").pop();if(ext==="kml")return parseKml(await file.text());if(ext==="kmz"){const zip=await JSZip.loadAsync(await file.arrayBuffer()),name=Object.keys(zip.files).find(n=>n.toLowerCase().endsWith(".kml"));if(!name)throw new Error("O KMZ não contém arquivo KML interno.");return parseKml(await zip.files[name].async("text"))}throw new Error("Envie um arquivo .kml ou .kmz.")}
+    async function loadRoute(file){try{fileName.textContent=file.name;routeStatus.textContent="Lendo o arquivo e extraindo o traçado...";route=await readFile(file);routeLine.setLatLngs(route);reset();fitRoute();routeStatus.textContent=`Traçado real carregado: ${route.length} coordenadas lidas do arquivo.`}catch(e){routeStatus.textContent=e.message||"Não foi possível carregar o arquivo."}}
+    chooseFileBtn.onclick=()=>routeFile.click(); routeFile.onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)loadRoute(f)}; toggleBtn.onclick=()=>{playing=!playing;toggleBtn.textContent=playing?"Pausar":"Iniciar";if(playing)updateEta()}; resetBtn.onclick=reset; fitBtn.onclick=fitRoute; speedBtn.onclick=()=>{speedIndex=(speedIndex+1)%speeds.length;speedBtn.textContent=`Velocidade ${speeds[speedIndex]}x`};
+    renderStops();renderTimeline();updateClock();updateEta();fitRoute();requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

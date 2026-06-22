@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Linha 01A - Pontos de Onibus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="linha-01a-pontos.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-block">
+      <p class="eyebrow">Prototipo PushBus</p>
+      <h1>Linha 01A por ponto de onibus</h1>
+      <span>Rastreia apenas carros da linha 01A e dispara mensagens por geofence.</span>
+    </div>
+
+    <div class="controls">
+      <button id="btnLogin">Autenticar</button>
+      <button id="btnRefresh" class="primary">Atualizar</button>
+      <button id="btnNotify">Ativar notificacoes</button>
+      <button id="btnFit">Ver pontos</button>
+      <label>
+        Auto
+        <select id="refreshInterval">
+          <option value="0">Off</option>
+          <option value="10000">10s</option>
+          <option value="20000" selected>20s</option>
+          <option value="60000">60s</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="points-panel" aria-label="Pontos da linha 01A">
+      <section class="status-strip">
+        <div>
+          <strong id="vehicleCount">0</strong>
+          <span>carros 01A</span>
+        </div>
+        <div>
+          <strong id="pointCount">12</strong>
+          <span>pontos</span>
+        </div>
+        <div>
+          <strong id="messageCount">0</strong>
+          <span>mensagens</span>
+        </div>
+      </section>
+
+      <div id="status" class="status">Carregando dados da linha 01A...</div>
+
+      <div class="panel-heading">
+        <h2>Visao por ponto</h2>
+        <span id="updatedAt">Sem atualizacao</span>
+      </div>
+      <div id="pointList" class="point-list"></div>
+    </aside>
+
+    <section class="map-area" aria-label="Mapa dos pontos e veiculos">
+      <div id="map"></div>
+      <div class="map-summary">
+        <strong id="eventHeadline">Aguardando posicoes da linha 01A</strong>
+        <span id="eventDetail">Os pontos foram carregados do prototipo de geofence.</span>
+      </div>
+    </section>
+
+    <aside class="events-panel" aria-label="Mensagens disparadas">
+      <div class="panel-heading">
+        <h2>Mensagens</h2>
+        <span>Entrada e saida dos pontos</span>
+      </div>
+      <div id="eventList" class="event-list"></div>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="linha-01a-pontos.js" defer></script>
+</body>
+</html>

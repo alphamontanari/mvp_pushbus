@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>&Ocirc;nibus em tempo real por ponto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="realtime-pontos.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-block">
+      <p class="eyebrow">Monitoramento local</p>
+      <h1>&Ocirc;nibus em tempo real por ponto</h1>
+      <span>Posi&ccedil;&atilde;o real do ve&iacute;culo e mensagens de passagem por geofence.</span>
+    </div>
+
+    <div class="controls">
+      <button id="btnLogin">Autenticar</button>
+      <button id="btnRefresh" class="primary">Atualizar</button>
+      <button id="btnFit">Ver pontos</button>
+      <label>
+        Ve&iacute;culo
+        <select id="vehicleSelect"></select>
+      </label>
+      <label>
+        Auto
+        <select id="refreshInterval">
+          <option value="0">Desligada</option>
+          <option value="5000">5s</option>
+          <option value="10000">10s</option>
+          <option value="20000" selected>20s</option>
+          <option value="60000">60s</option>
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="points-panel" aria-label="Pontos de onibus">
+      <section class="status-strip">
+        <div>
+          <strong id="vehicleCount">0</strong>
+          <span>ve&iacute;culos</span>
+        </div>
+        <div>
+          <strong id="pointCount">12</strong>
+          <span>pontos</span>
+        </div>
+        <div>
+          <strong id="messageCount">0</strong>
+          <span>mensagens</span>
+        </div>
+      </section>
+
+      <div id="status" class="status">Aguardando atualiza&ccedil;&atilde;o...</div>
+
+      <article id="vehicleCard" class="vehicle-card empty-state">
+        Selecione um ve&iacute;culo e clique em Atualizar.
+      </article>
+
+      <div class="panel-heading">
+        <h2>Pontos monitorados</h2>
+        <span id="updatedAt">Sem atualiza&ccedil;&atilde;o</span>
+      </div>
+      <div id="pointList" class="point-list"></div>
+    </aside>
+
+    <section class="map-area" aria-label="Mapa dos pontos e veiculos">
+      <div id="map"></div>
+      <div class="map-summary">
+        <strong id="eventHeadline">Aguardando passagem em ponto</strong>
+        <span id="eventDetail">Os pontos foram carregados no mapa. Nenhum evento foi disparado ainda.</span>
+      </div>
+    </section>
+
+    <aside class="events-panel" aria-label="Historico de mensagens">
+      <div class="panel-heading">
+        <h2>Mensagens</h2>
+        <span>Passagens por geofence</span>
+      </div>
+      <div id="eventList" class="event-list"></div>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="realtime-pontos.js" defer></script>
+</body>
+</html>

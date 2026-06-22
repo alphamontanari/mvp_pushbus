@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>PushBus V0.0.1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f7a36" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="PushBus" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="pushbus-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="pushbus.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section id="lineScreen" class="screen line-screen" aria-label="Lista de linhas">
+      <header class="screen-header">
+        <div>
+          <p class="eyebrow">PushBus V0.0.1</p>
+          <h1>Linhas de onibus</h1>
+        </div>
+        <button id="installButton" class="ghost hidden">Instalar</button>
+      </header>
+
+      <label class="search-box">
+        <span>Pesquisar linha</span>
+        <input id="lineSearch" type="search" placeholder="Ex.: 001A, 01A, Estancia..." autocomplete="off" />
+      </label>
+
+      <div id="lineList" class="line-list"></div>
+
+      <div class="panel-note">
+        Escolha uma linha para acompanhar os pontos atendidos e o onibus em operacao.
+      </div>
+    </section>
+
+    <section id="routeScreen" class="screen route-screen hidden" aria-label="Pontos da linha">
+      <header class="screen-header route-header">
+        <button id="backButton" class="back-button" aria-label="Voltar para linhas">Linhas</button>
+        <div>
+          <p class="eyebrow">Acompanhamento</p>
+          <h1 id="selectedLineTitle">LINHA 01A</h1>
+        </div>
+        <span id="connectionPill" class="pill">Local</span>
+      </header>
+
+      <section class="route-card">
+        <h2 id="routeTitle">LINHA 01A</h2>
+        <p><strong>Partida:</strong> <span id="routeStart">-</span></p>
+        <p><strong>Chegada:</strong> <span id="routeEnd">-</span></p>
+      </section>
+
+      <section class="live-card" aria-live="polite">
+        <div class="bus-bubble">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <rect x="10" y="7" width="28" height="31" rx="5"></rect>
+            <rect x="14" y="12" width="20" height="10" rx="1.5"></rect>
+            <circle cx="17" cy="34" r="3"></circle>
+            <circle cx="31" cy="34" r="3"></circle>
+            <path d="M14 26h20"></path>
+          </svg>
+        </div>
+        <div>
+          <strong id="eventHeadline">Aguardando posicao real do onibus</strong>
+          <span id="vehicleStatus">Onibus ainda nao localizado</span>
+          <b id="etaText">proximo ponto: calculando...</b>
+        </div>
+      </section>
+
+      <section class="compact-controls">
+        <label>
+          Onibus/carro
+          <select id="vehicleSelect"></select>
+        </label>
+        <label>
+          Atualizar
+          <select id="refreshInterval">
+            <option value="0">manual</option>
+            <option value="5000">5s</option>
+            <option value="10000" selected>10s</option>
+            <option value="20000">20s</option>
+            <option value="60000">60s</option>
+          </select>
+        </label>
+        <button id="refreshButton" class="primary">Atualizar agora</button>
+      </section>
+
+      <section class="meta-list">
+        <p><span>Dia de semana</span> <b>Saida: <span id="startTime">05:50</span></b></p>
+        <p><span>Servico</span> <b id="serviceText">BAIRRO -> CENTRO</b></p>
+        <p><span>Ultima leitura</span> <b id="lastUpdate">Sem atualizacao</b></p>
+      </section>
+
+      <section class="timeline-card">
+        <div class="section-heading">
+          <h2>Pontos de onibus</h2>
+          <span id="progressText">0 de 0 pontos</span>
+        </div>
+        <div id="timeline" class="timeline"></div>
+      </section>
+
+      <section class="history-card">
+        <div class="section-heading">
+          <h2>Historico de passagem</h2>
+          <span>Geofence</span>
+        </div>
+        <div id="eventList" class="event-list"></div>
+      </section>
+
+      <section class="legend-card">
+        <strong>Legenda</strong>
+        <div>
+          <span><i class="legend-dot terminal"></i>Terminais</span>
+          <span><i class="legend-dot integration"></i>Integracao</span>
+          <span><i class="legend-dot passage"></i>Passagem</span>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="pushbus-data.js"></script>
+  <script src="pushbus.js" defer></script>
+</body>
+</html>
