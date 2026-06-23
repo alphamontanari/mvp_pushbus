@@ -142,19 +142,64 @@ function normalizeSearchText(value) {
     .replace(/\s+/g, "");
 }
 
-function lineCodeVariants(lineCode) {
-  const normalized = normalizeSearchText(lineCode);
-  if (!normalized) return [];
+function normalizeCodeText(value) {
+  return normalizeSearchText(value).replace(/[^A-Z0-9]/g, "");
+}
 
-  const variants = new Set([normalized]);
-  const withoutLeadingZeros = normalized.replace(/^0+(?=\d)/, "");
-  if (withoutLeadingZeros) variants.add(withoutLeadingZeros);
+function addLineCodeVariants(variants, value) {
+  const normalized = normalizeCodeText(value);
+  if (!normalized) return;
+
+  variants.add(normalized);
+
+  const match = normalized.match(/^(\d+)([A-Z]+)?$/);
+  if (!match) return;
+
+  const digits = match[1];
+  const suffix = match[2] || "";
+  const trimmedDigits = digits.replace(/^0+/, "") || "0";
+  const widths = new Set([digits.length, 2, 3]);
+
+  widths.forEach(width => {
+    if (trimmedDigits.length <= width) {
+      variants.add(`${trimmedDigits.padStart(width, "0")}${suffix}`);
+      variants.add(trimmedDigits.padStart(width, "0"));
+    }
+  });
+
+  if (suffix) variants.add(`${trimmedDigits}${suffix}`);
+  if (digits.length > 1) variants.add(trimmedDigits);
+}
+
+function lineCodeVariants(lineCodes) {
+  const variants = new Set();
+  const values = Array.isArray(lineCodes) ? lineCodes : [lineCodes];
+
+  values.forEach(value => addLineCodeVariants(variants, value));
 
   return [...variants];
 }
 
-function lineMatches(vehicle, lineCode) {
-  const expected = lineCodeVariants(lineCode);
+function lineCandidateValues(value) {
+  const normalized = normalizeSearchText(value);
+  const compact = normalizeCodeText(value);
+  const tokens = normalized
+    .replace(/[^A-Z0-9]+/g, " ")
+    .split(/\s+/)
+    .map(token => token.trim())
+    .filter(Boolean);
+
+  return [compact, ...tokens].filter(Boolean);
+}
+
+function candidateMatchesVariant(candidate, variant) {
+  if (candidate === variant) return true;
+  if (variant.length < 3) return false;
+  return candidate.includes(variant);
+}
+
+function lineMatches(vehicle, lineCodes) {
+  const expected = lineCodeVariants(lineCodes);
   if (!expected.length) return true;
 
   return [
@@ -162,10 +207,52 @@ function lineMatches(vehicle, lineCode) {
     vehicle.route,
     vehicle.lineId,
     vehicle.routeId
-  ].some(value => {
-    const candidate = normalizeSearchText(value);
-    return expected.some(code => candidate.includes(code));
-  });
+  ].some(value => lineCandidateValues(value)
+    .some(candidate => expected.some(code => candidateMatchesVariant(candidate, code))));
+}
+
+function toRad(value) {
+  return value * Math.PI / 180;
+}
+
+function distanceMeters(a, b) {
+  const radius = 6371000;
+  const dLat = toRad(b[0] - a[0]);
+  const dLng = toRad(b[1] - a[1]);
+  const lat1 = toRad(a[0]);
+  const lat2 = toRad(b[0]);
+  const value = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+
+  return 2 * radius * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
+function parseLineStops(value) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map(stop => ({
+      id: stop.id || "",
+      lat: Number(stop.lat),
+      lng: Number(stop.lng),
+      radius: Number(stop.radius)
+    }))
+    .filter(stop => Number.isFinite(stop.lat) && Number.isFinite(stop.lng));
+}
+
+function nearestLineStopDistance(vehicle, stops) {
+  if (!stops.length) return null;
+
+  return stops
+    .map(stop => ({
+      stop,
+      distance: distanceMeters([vehicle.latitude, vehicle.longitude], [stop.lat, stop.lng])
+    }))
+    .sort((a, b) => a.distance - b.distance)[0] || null;
+}
+
+function vehicleListFromApiData(data) {
+  return Array.isArray(data) ? data : (data.items || data.data || data.list || []);
 }
 
 async function fetchPositionsWithToken(token, payload) {
@@ -231,13 +318,28 @@ app.post("/api/vehicles/positions", async (req, res) => {
       return res.status(500).json({ error: "Configuração incompleta no .env", missing });
     }
 
+    const requestedVehicles = Array.isArray(req.body.vehicles)
+      ? req.body.vehicles.map(Number).filter(Number.isFinite)
+      : [];
+    const allVehicles = req.body.allVehicles === true;
     const payload = {
       lines: Array.isArray(req.body.lines) ? req.body.lines : [],
-      vehicles: Array.isArray(req.body.vehicles) && req.body.vehicles.length
-        ? req.body.vehicles.map(Number).filter(Number.isFinite)
-        : DEFAULT_VEHICLES
+      vehicles: requestedVehicles.length
+        ? requestedVehicles
+        : allVehicles
+          ? []
+          : DEFAULT_VEHICLES
     };
     const lineCode = typeof req.body.lineCode === "string" ? req.body.lineCode.trim() : "";
+    const lineAliases = Array.isArray(req.body.lineAliases)
+      ? req.body.lineAliases.map(value => String(value || "").trim()).filter(Boolean)
+      : [];
+    const lineFilter = [lineCode, ...lineAliases].filter(Boolean);
+    const lineStops = parseLineStops(req.body.lineStops);
+    const requestedNearStopRadiusMeters = Number(req.body.nearStopRadiusMeters || 0);
+    const nearStopRadiusMeters = Number.isFinite(requestedNearStopRadiusMeters)
+      ? Math.max(0, Math.min(requestedNearStopRadiusMeters, 5000))
+      : 0;
 
     let token = await getAccessToken();
     let response = await fetchPositionsWithToken(token, payload);
@@ -264,17 +366,61 @@ app.post("/api/vehicles/positions", async (req, res) => {
       return res.status(502).json({ error: "Resposta não veio em JSON", body: text.slice(0, 1000) });
     }
 
-    const list = Array.isArray(data) ? data : (data.items || data.data || data.list || []);
+    let list = vehicleListFromApiData(data);
+
+    if (!list.length && allVehicles && !requestedVehicles.length && DEFAULT_VEHICLES.length) {
+      payload.vehicles = DEFAULT_VEHICLES;
+      response = await fetchPositionsWithToken(token, payload);
+      const fallbackText = await response.text();
+
+      if (!response.ok) {
+        return res.status(response.status).json({
+          error: "Erro ao consultar API Cittati/FLITS",
+          status: response.status,
+          body: fallbackText.slice(0, 1000)
+        });
+      }
+
+      try {
+        data = JSON.parse(fallbackText);
+      } catch {
+        return res.status(502).json({ error: "Resposta nÃ£o veio em JSON", body: fallbackText.slice(0, 1000) });
+      }
+
+      list = vehicleListFromApiData(data);
+    }
+
     const vehicles = list
       .map(normalizeVehicle)
       .filter(v => Number.isFinite(v.latitude) && Number.isFinite(v.longitude))
-      .filter(v => lineMatches(v, lineCode));
+      .map(vehicle => {
+        const nearest = nearestLineStopDistance(vehicle, lineStops);
+        const lineMatch = lineMatches(vehicle, lineFilter);
+        const nearbyLineStop = Boolean(nearest && nearStopRadiusMeters && nearest.distance <= nearStopRadiusMeters);
+
+        return {
+          ...vehicle,
+          lineMatch,
+          nearbyLineStop,
+          nearestLineStopDistance: nearest ? Math.round(nearest.distance) : null,
+          nearestLineStopId: nearest?.stop?.id || null
+        };
+      })
+      .filter(vehicle => {
+        if (!lineFilter.length && !lineStops.length) return true;
+        return vehicle.lineMatch || vehicle.nearbyLineStop;
+      });
 
     res.json({
       count: vehicles.length,
       updatedAt: new Date().toISOString(),
       filter: {
-        lineCode: lineCode || null
+        lineCode: lineCode || null,
+        lineAliases,
+        lineVariants: lineCodeVariants(lineFilter),
+        nearStopRadiusMeters: nearStopRadiusMeters || null,
+        allVehicles,
+        fallbackDefaultVehicles: allVehicles && !requestedVehicles.length && payload.vehicles.length > 0
       },
       vehicles
     });

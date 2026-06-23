@@ -1,4 +1,6 @@
 const LINE_CODE = "01A";
+const LINE_ALIASES = ["001A", "01A", "1A", "001", "01"];
+const LINE_NEAR_STOP_RADIUS_METERS = 1200;
 const DEFAULT_CENTER = [-23.5716, -48.0252];
 
 const STOPS = [
@@ -253,6 +255,15 @@ function distanceVehicleStop(vehicle, stop) {
   return distanceMeters([vehicle.latitude, vehicle.longitude], [stop.lat, stop.lng]);
 }
 
+function lineStopPayload() {
+  return STOPS.map(stop => ({
+    id: stop.id,
+    lat: stop.lat,
+    lng: stop.lng,
+    radius: stop.radiusExit || stop.radiusEnter
+  }));
+}
+
 function markerIcon(vehicle) {
   return L.divIcon({
     className: "",
@@ -378,7 +389,7 @@ function renderPointList(vehicles) {
 
     const vehicleText = nearest
       ? `Carro ${escapeHtml(vehicleLabel(nearest.vehicle))} a ${formatDistance(nearest.distance)} - ETA ${etaLabel(nearest.distance, nearest.vehicle.velocity)}`
-      : "Nenhum carro 01A retornado pela API para este ponto.";
+      : "Nenhum carro da linha ou proximo deste ponto retornado agora.";
 
     const lastMessage = messagesByStop.get(stop.id) || "Sem mensagem disparada neste ponto.";
 
@@ -521,14 +532,18 @@ async function login() {
 
 async function fetchPositions() {
   return apiPost("/api/vehicles/positions", {
-    lineCode: LINE_CODE
+    lineCode: LINE_CODE,
+    lineAliases: LINE_ALIASES,
+    lineStops: lineStopPayload(),
+    nearStopRadiusMeters: LINE_NEAR_STOP_RADIUS_METERS,
+    allVehicles: true
   });
 }
 
 async function refresh() {
   if (refreshInFlight) return;
   refreshInFlight = true;
-  els.status.textContent = `Consultando carros da linha ${LINE_CODE}...`;
+  els.status.textContent = `Consultando carros da linha ${LINE_CODE} e proximos dos pontos...`;
 
   try {
     const data = await fetchPositions();
@@ -543,9 +558,9 @@ async function refresh() {
     els.updatedAt.textContent = formatDateTime(data.updatedAt);
 
     if (vehicles.length) {
-      els.status.textContent = `${vehicles.length} carro(s) da linha ${LINE_CODE} atualizados em ${formatDateTime(data.updatedAt)}.`;
+      els.status.textContent = `${vehicles.length} carro(s) da linha ${LINE_CODE} ou proximos dos pontos atualizados em ${formatDateTime(data.updatedAt)}.`;
     } else {
-      els.status.textContent = `Nenhum carro da linha ${LINE_CODE} retornou agora. O filtro aceita 01A e o alias [1A]; confira tambem se os carros estao na lista padrao do servidor.`;
+      els.status.textContent = `Nenhum carro da linha ${LINE_CODE}, aliases ${LINE_ALIASES.join(", ")} ou proximo dos pontos retornou agora.`;
       els.eventHeadline.textContent = `Sem carros ${LINE_CODE} na ultima consulta`;
       els.eventDetail.textContent = `Atualizado em ${formatDateTime(data.updatedAt)}.`;
     }
