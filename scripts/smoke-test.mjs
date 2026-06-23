@@ -10,7 +10,7 @@ const pageChecks = [
   { path: "/linha-01a-pontos.html", title: "MVPPUSHBS - Linha 01A" },
   { path: "/realtime-pontos.html", title: "MVPPUSHBS - Tempo real" },
   { path: "/manifest.webmanifest", contains: "MVPPUSHBS" },
-  { path: "/sw.js", contains: "mvppushbs-v0-0-7-line-tracking" }
+  { path: "/sw.js", contains: "mvppushbs-v0-0-8-start-priority" }
 ];
 
 async function request(path) {
