@@ -4,7 +4,7 @@ window.PUSHBUS_LINES = [
     code: "001A",
     displayCode: "01A",
     name: "Linha 01A",
-    aliases: ["001A", "01A", "1A"],
+    aliases: ["001A", "01A", "1A", "001", "01"],
     startName: "ESTANCIA 4 IRMAOS",
     endName: "MEIA LUA RODOVIARIA",
     service: "BAIRRO -> CENTRO",

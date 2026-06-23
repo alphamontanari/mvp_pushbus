@@ -1,4 +1,4 @@
-const CACHE_NAME = "mvppushbs-v0-0-6-pontos-page";
+const CACHE_NAME = "mvppushbs-v0-0-7-line-tracking";
 const SHELL_ASSETS = [
   "/",
   "/index.html",
