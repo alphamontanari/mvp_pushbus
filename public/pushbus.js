@@ -5,6 +5,7 @@ const defaultVehicles = Array.isArray(window.PUSHBUS_DEFAULT_VEHICLES)
 
 const RESET_AFTER_FINAL_MS = 30000;
 const LINE_NEAR_STOP_RADIUS_METERS = 1200;
+const START_STOP_PRIORITY_RADIUS_METERS = 1200;
 
 const state = {
   selectedLineId: "",
@@ -278,7 +279,7 @@ function renderVehicleSelect() {
 
   els.vehicleSelect.innerHTML = [
     "<option value=\"auto\">Automatico</option>",
-    ...vehicles.map(vehicle => {
+    ...sortVehiclesByStartPriority(vehicles, line).map(vehicle => {
       const nearby = line ? nearestStop(vehicle, line) : null;
       const nearText = nearby ? ` - ${formatDistance(nearby.distance)} de ${nearby.stop.name}` : "";
       const lineText = vehicle.line || vehicle.route || "sem linha";
@@ -326,6 +327,51 @@ function chooseVehicleForProgress(vehicles, line) {
       distance: distanceMeters([vehicle.latitude, vehicle.longitude], [targetStop.lat, targetStop.lng])
     }))
     .sort((a, b) => a.distance - b.distance)[0]?.vehicle || vehicles[0];
+}
+
+function distanceVehicleToStop(vehicle, stop) {
+  return distanceMeters([vehicle.latitude, vehicle.longitude], [stop.lat, stop.lng]);
+}
+
+function startStopPriorityCandidate(vehicles, line) {
+  if (state.selectedVehicleId !== "auto") return null;
+
+  const startStop = line?.stops?.[0];
+  if (!startStop || !vehicles.length) return null;
+
+  const candidates = vehicles
+    .map(vehicle => ({
+      vehicle,
+      stop: startStop,
+      index: 0,
+      distance: distanceVehicleToStop(vehicle, startStop)
+    }))
+    .filter(item => item.distance <= START_STOP_PRIORITY_RADIUS_METERS)
+    .sort((a, b) => a.distance - b.distance);
+
+  if (!candidates.length) return null;
+
+  const lineCandidates = candidates.filter(item => item.vehicle.lineMatch);
+  return lineCandidates[0] || candidates[0];
+}
+
+function sortVehiclesByStartPriority(vehicles, line) {
+  const startStop = line?.stops?.[0];
+  if (!startStop) return vehicles;
+
+  return [...vehicles].sort((a, b) => {
+    const aDistance = distanceVehicleToStop(a, startStop);
+    const bDistance = distanceVehicleToStop(b, startStop);
+    const aNearStart = aDistance <= START_STOP_PRIORITY_RADIUS_METERS;
+    const bNearStart = bDistance <= START_STOP_PRIORITY_RADIUS_METERS;
+
+    if (aNearStart !== bNearStart) return aNearStart ? -1 : 1;
+    if (aNearStart && bNearStart && Boolean(a.lineMatch) !== Boolean(b.lineMatch)) {
+      return a.lineMatch ? -1 : 1;
+    }
+
+    return aDistance - bDistance;
+  });
 }
 
 function nearestStop(vehicle, line) {
@@ -555,9 +601,10 @@ async function refreshPositions() {
     const vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
     state.lineVehicles = vehicles;
     const progressHit = updateProgressFromGeofences(vehiclesForProgress(vehicles), line);
-    const vehicle = progressHit?.vehicle || chooseVehicleForProgress(vehicles, line);
+    const startHit = startStopPriorityCandidate(vehicles, line);
+    const vehicle = startHit?.vehicle || progressHit?.vehicle || chooseVehicleForProgress(vehicles, line);
     state.latestVehicle = vehicle || null;
-    const nearby = progressHit?.nearby || nearestStop(vehicle, line);
+    const nearby = startHit || progressHit?.nearby || nearestStop(vehicle, line);
 
     renderVehicleSelect();
     renderTimeline();
