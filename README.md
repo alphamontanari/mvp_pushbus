@@ -85,7 +85,7 @@ Nao coloque usuario, senha ou token no JavaScript publico.
 | --- | --- | --- |
 | MVPPUSHBS | `http://localhost:3000/` | App principal instalavel no celular. Abre na lista de linhas e, ao selecionar uma linha, exibe a progressao dos pontos e o onibus/carro monitorado. Inclui botao para ativar push local. |
 | MVPPUSHBS | `http://localhost:3000/index.html` | Mesma tela principal, acessada pelo arquivo HTML diretamente. |
-| Mapa de todos os onibus | `http://localhost:3000/mapa.html` | Mapa com os mesmos pontos da linha 01A, mas consultando todos os veiculos padrao sem filtro de linha. Permite mostrar todos, focar um onibus pelo select ou por duplo clique no marcador, e qualquer onibus gera mensagem ao passar no ponto. |
+| Mapa de todos os onibus | `http://localhost:3000/mapa.html` | Mapa com os mesmos pontos da linha 01A, mas consultando todos os veiculos padrao sem filtro de linha. Permite mostrar todos, focar um onibus, focar um ponto, ligar/desligar camadas do mapa e gerar mensagem quando qualquer onibus passa no ponto. |
 | Linha 01A por ponto | `http://localhost:3000/linha-01a-pontos.html` | Tela com pontos da linha 01A, geofence, mapa dos veiculos filtrados e mensagens de entrada/saida dos pontos. |
 | Onibus em tempo real por ponto | `http://localhost:3000/realtime-pontos.html` | Nova tela com um veiculo em tempo real, pontos no mapa, circulos de geofence e mensagem `Passou no ponto X` quando o veiculo entra no raio do ponto. |
 

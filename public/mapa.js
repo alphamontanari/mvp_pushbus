@@ -24,7 +24,6 @@ const route = STOPS.map(stop => [stop.lat, stop.lng]);
 const els = {
   status: document.querySelector("#status"),
   updatedAt: document.querySelector("#updatedAt"),
-  pointList: document.querySelector("#pointList"),
   eventList: document.querySelector("#eventList"),
   vehicleCount: document.querySelector("#vehicleCount"),
   pointCount: document.querySelector("#pointCount"),
@@ -32,7 +31,13 @@ const els = {
   eventHeadline: document.querySelector("#eventHeadline"),
   eventDetail: document.querySelector("#eventDetail"),
   selectedVehicleSummary: document.querySelector("#selectedVehicleSummary"),
+  selectedPointSummary: document.querySelector("#selectedPointSummary"),
   vehicleSelect: document.querySelector("#vehicleSelect"),
+  pointSelect: document.querySelector("#pointSelect"),
+  toggleRoute: document.querySelector("#toggleRoute"),
+  toggleGeofence: document.querySelector("#toggleGeofence"),
+  toggleStops: document.querySelector("#toggleStops"),
+  toggleVehicles: document.querySelector("#toggleVehicles"),
   btnLogin: document.querySelector("#btnLogin"),
   btnRefresh: document.querySelector("#btnRefresh"),
   btnNotify: document.querySelector("#btnNotify"),
@@ -49,22 +54,30 @@ L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r
   attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
 }).addTo(map);
 
-L.polyline(route, {
+const routeLayer = L.polyline(route, {
   color: "#16833a",
   weight: 5,
   opacity: 0.85,
   lineCap: "round",
   lineJoin: "round"
-}).addTo(map);
+});
 
+const geofenceLayer = L.layerGroup().addTo(map);
 const stopLayer = L.layerGroup().addTo(map);
+const vehicleLayer = L.layerGroup().addTo(map);
 const vehicleMarkers = new Map();
+const stopMarkers = new Map();
 const vehicleStates = new Map();
 const messagesByStop = new Map();
 const events = [];
 
+const initialPointId = new URLSearchParams(window.location.search).get("ponto")
+  || new URLSearchParams(window.location.search).get("point")
+  || "";
+
 let latestVehicles = [];
 let selectedVehicleKey = "";
+let selectedStopId = stopById.has(initialPointId) ? initialPointId : "";
 let timer = null;
 let refreshInFlight = false;
 let notificationsEnabled = false;
@@ -182,17 +195,22 @@ function popupHtml(vehicle) {
   `;
 }
 
-function stopIcon() {
+function stopIcon(stop) {
+  const selected = stop.id === selectedStopId;
+  const dimmed = Boolean(selectedStopId && !selected);
+
   return L.divIcon({
     className: "",
-    html: "<div class=\"stop-pin\"></div>",
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
+    html: `<div class="stop-pin ${selected ? "selected" : ""} ${dimmed ? "dimmed" : ""}"></div>`,
+    iconSize: selected ? [30, 30] : [24, 24],
+    iconAnchor: selected ? [15, 15] : [12, 12]
   });
 }
 
 function renderStopMarkers() {
+  geofenceLayer.clearLayers();
   stopLayer.clearLayers();
+  stopMarkers.clear();
 
   STOPS.forEach((stop, index) => {
     L.circle([stop.lat, stop.lng], {
@@ -201,9 +219,9 @@ function renderStopMarkers() {
       weight: 1,
       fillColor: "#20b64b",
       fillOpacity: 0.08
-    }).addTo(stopLayer);
+    }).addTo(geofenceLayer);
 
-    L.marker([stop.lat, stop.lng], { icon: stopIcon() })
+    const marker = L.marker([stop.lat, stop.lng], { icon: stopIcon(stop) })
       .bindPopup(`
         <strong>${escapeHtml(index + 1)}. ${escapeHtml(stop.display)}</strong><br>
         ${escapeHtml(stop.address)}<br>
@@ -211,7 +229,12 @@ function renderStopMarkers() {
         Raio: ${stop.radiusEnter}m entrada / ${stop.radiusExit}m saida
       `)
       .addTo(stopLayer);
+
+    marker.on("click", () => selectStop(stop.id, { center: true, openPopup: true, updateUrl: true }));
+    stopMarkers.set(stop.id, marker);
   });
+
+  applyLayerOptions();
 }
 
 function fitAll() {
@@ -226,7 +249,7 @@ function selectVehicle(key, options = {}) {
 
   renderVehicleMarkers(latestVehicles);
   renderSelectedVehicle();
-  renderPointList(latestVehicles);
+  renderSelectedPoint();
 
   const vehicle = selectedVehicle();
   if (!vehicle) {
@@ -267,7 +290,7 @@ function renderVehicleMarkers(vehicles) {
     } else {
       const marker = L.marker(latlng, { icon: markerIcon(vehicle) })
         .bindPopup(popupHtml(vehicle))
-        .addTo(map);
+        .addTo(vehicleLayer);
 
       marker.on("dblclick", () => selectVehicle(key, { center: true, openPopup: true }));
       vehicleMarkers.set(key, marker);
@@ -280,6 +303,8 @@ function renderVehicleMarkers(vehicles) {
       vehicleMarkers.delete(key);
     }
   }
+
+  applyLayerOptions();
 }
 
 function renderVehicleSelect(vehicles) {
@@ -328,14 +353,6 @@ function nearestEnteringStop(vehicle) {
     .sort((a, b) => a.distance - b.distance)[0]?.stop || null;
 }
 
-function pointBadge(nearest, stop) {
-  if (!nearest) return { label: "Sem onibus", className: "empty" };
-  if (nearest.distance <= stop.radiusEnter) return { label: "Passando", className: "arriving" };
-  if (nearest.distance <= 250) return { label: "Proximo", className: "near" };
-  if (nearest.distance <= 1200) return { label: "A caminho", className: "" };
-  return { label: "Distante", className: "warning" };
-}
-
 function renderSelectedVehicle() {
   const vehicle = selectedVehicle();
 
@@ -352,44 +369,91 @@ function renderSelectedVehicle() {
     : `Carro ${vehicleLabel(vehicle)} em foco: ${lineLabel(vehicle)}.`;
 }
 
-function renderPointList(vehicles) {
-  const selected = selectedVehicle();
-  els.pointList.innerHTML = "";
+function renderPointSelect() {
+  els.pointSelect.innerHTML = "";
+
+  const allOption = document.createElement("option");
+  allOption.value = "";
+  allOption.textContent = "Todos os pontos";
+  els.pointSelect.appendChild(allOption);
 
   STOPS.forEach((stop, index) => {
-    const nearest = nearestVehicleForStop(stop, vehicles);
-    const selectedDistance = selected ? distanceVehicleStop(selected, stop) : null;
-    const badge = pointBadge(nearest, stop);
-    const card = document.createElement("article");
-    card.className = `point-card ${selectedDistance !== null && selectedDistance <= 250 ? "focused" : ""}`;
+    const option = document.createElement("option");
+    option.value = stop.id;
+    option.textContent = `${index + 1}. ${stop.display}`;
+    els.pointSelect.appendChild(option);
+  });
 
-    const nearestText = nearest
-      ? `Mais proximo: Carro ${escapeHtml(vehicleLabel(nearest.vehicle))} (${escapeHtml(lineLabel(nearest.vehicle))}) a ${formatDistance(nearest.distance)} - ETA ${etaLabel(nearest.distance, nearest.vehicle.velocity)}`
-      : "Nenhum onibus retornado pela API para este ponto.";
-    const selectedText = selected
-      ? `<br><b>Em foco:</b> Carro ${escapeHtml(vehicleLabel(selected))} a ${formatDistance(selectedDistance)} - ETA ${etaLabel(selectedDistance, selected.velocity)}`
-      : "";
-    const lastMessage = messagesByStop.get(stop.id) || "Sem mensagem disparada neste ponto.";
+  els.pointSelect.value = selectedStopId;
+}
 
-    card.innerHTML = `
-      <div class="point-index">${index + 1}</div>
-      <div>
-        <div class="point-title">
-          <span>${escapeHtml(stop.display)}</span>
-          <span class="badge ${badge.className}">${escapeHtml(badge.label)}</span>
-        </div>
-        <div class="point-meta">
-          ${escapeHtml(stop.plannedTime)} - ${escapeHtml(stop.type)} - ${escapeHtml(stop.address)}
-        </div>
-        <div class="point-message">${nearestText}${selectedText}<br>${escapeHtml(lastMessage)}</div>
-      </div>
-    `;
+function selectedStop() {
+  return selectedStopId ? stopById.get(selectedStopId) || null : null;
+}
 
-    card.addEventListener("click", () => {
-      map.setView([stop.lat, stop.lng], 17);
-    });
+function renderSelectedPoint() {
+  const stop = selectedStop();
 
-    els.pointList.appendChild(card);
+  if (!stop) {
+    els.selectedPointSummary.textContent = "Todos os pontos ficam disponiveis no mapa. Escolha um ponto para destacar.";
+    return;
+  }
+
+  const nearest = nearestVehicleForStop(stop, latestVehicles);
+  const lastMessage = messagesByStop.get(stop.id);
+  const nearestText = nearest
+    ? `Mais proximo: carro ${vehicleLabel(nearest.vehicle)} (${lineLabel(nearest.vehicle)}) a ${formatDistance(nearest.distance)}, ETA ${etaLabel(nearest.distance, nearest.vehicle.velocity)}.`
+    : "Nenhum onibus retornado para calcular aproximacao.";
+  const messageText = lastMessage ? ` Ultima mensagem: ${lastMessage}` : "";
+
+  els.selectedPointSummary.textContent = `${stop.display} - ${stop.address}. ${nearestText}${messageText}`;
+}
+
+function selectStop(stopId, options = {}) {
+  selectedStopId = stopById.has(stopId) ? stopId : "";
+  els.pointSelect.value = selectedStopId;
+
+  renderStopMarkers();
+  renderSelectedPoint();
+
+  const stop = selectedStop();
+  if (!stop) {
+    if (options.center) fitAll();
+    els.eventHeadline.textContent = "Todos os pontos no mapa";
+    els.eventDetail.textContent = "Selecione um ponto para destacar e aproximar o mapa.";
+  } else {
+    if (options.center) map.setView([stop.lat, stop.lng], 17);
+    if (options.openPopup) stopMarkers.get(stop.id)?.openPopup();
+    els.eventHeadline.textContent = `Ponto em foco: ${stop.display}`;
+    els.eventDetail.textContent = `${stop.type} - ${stop.address}.`;
+  }
+
+  if (options.updateUrl) {
+    const url = new URL(window.location.href);
+    if (selectedStopId) {
+      url.searchParams.set("ponto", selectedStopId);
+    } else {
+      url.searchParams.delete("ponto");
+      url.searchParams.delete("point");
+    }
+    window.history.replaceState({}, "", url);
+  }
+}
+
+function applyLayerOptions() {
+  const visibility = [
+    { enabled: els.toggleRoute.checked, layer: routeLayer },
+    { enabled: els.toggleGeofence.checked, layer: geofenceLayer },
+    { enabled: els.toggleStops.checked, layer: stopLayer },
+    { enabled: els.toggleVehicles.checked, layer: vehicleLayer }
+  ];
+
+  visibility.forEach(item => {
+    if (item.enabled && !map.hasLayer(item.layer)) {
+      item.layer.addTo(map);
+    } else if (!item.enabled && map.hasLayer(item.layer)) {
+      item.layer.removeFrom(map);
+    }
   });
 }
 
@@ -526,7 +590,7 @@ async function refresh() {
     renderVehicleSelect(vehicles);
     renderSelectedVehicle();
     renderVehicleMarkers(vehicles);
-    renderPointList(vehicles);
+    renderSelectedPoint();
 
     if (!selectedVehicleKey && vehicles.length && !hasFittedVehicles) {
       fitAll();
@@ -575,6 +639,7 @@ async function enableNotifications() {
 }
 
 els.vehicleSelect.addEventListener("change", () => selectVehicle(els.vehicleSelect.value, { center: true, openPopup: true }));
+els.pointSelect.addEventListener("change", () => selectStop(els.pointSelect.value, { center: true, openPopup: true, updateUrl: true }));
 
 els.btnLogin.addEventListener("click", async () => {
   try {
@@ -590,10 +655,18 @@ els.btnRefresh.addEventListener("click", refresh);
 els.btnNotify.addEventListener("click", enableNotifications);
 els.btnFit.addEventListener("click", fitAll);
 els.refreshInterval.addEventListener("change", setupTimer);
+[els.toggleRoute, els.toggleGeofence, els.toggleStops, els.toggleVehicles].forEach(input => {
+  input.addEventListener("change", applyLayerOptions);
+});
 
+renderPointSelect();
 renderStopMarkers();
-renderPointList([]);
+renderSelectedPoint();
 renderEventList();
 fitAll();
 setupTimer();
 refresh();
+
+if (selectedStopId) {
+  selectStop(selectedStopId, { center: true, openPopup: true });
+}

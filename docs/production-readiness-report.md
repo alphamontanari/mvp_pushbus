@@ -95,6 +95,28 @@ Incremento posterior em `feature/mvppushbs-app-shell`:
 - Assets locais versionados com `?v=mvppushbs2` para evitar que um service worker antigo entregue JS/CSS desatualizado.
 - Service worker atualizado para `mvppushbs-v0-0-3-shell`.
 
+Fix posterior em `fix/mapa-controles-pontos`:
+
+- `productionfull` recebeu a app shell por fast-forward antes da criacao da branch fix.
+- Tela `mapa.html` removeu a lista lateral completa de pontos.
+- Tela `mapa.html` ganhou select `Ponto em foco`, com destaque escuro no ponto selecionado.
+- Tela `mapa.html` passou a aceitar `?ponto=<id>` e `?point=<id>` para abrir ja focada em um ponto.
+- Linha entre pontos agora fica desligada por padrao e pode ser ativada em `Ligar pontos com linha`.
+- Controles de camadas adicionados para raios dos pontos, pontos no mapa e onibus.
+- Service worker atualizado para `mvppushbs-v0-0-4-map-controls`.
+
+Validacao do fix em Docker:
+
+- `docker compose up -d --build`: OK, container `healthy`.
+- `npm run smoke`: OK.
+- Browser em `/mapa.html`: lista lateral `#pointList` ausente.
+- Select de ponto: 13 opcoes, sendo `Todos os pontos` + 12 pontos.
+- Rota entre pontos: checkbox desligado por padrao; ao ligar, a camada da linha e adicionada.
+- Raios dos pontos: checkbox ligado por padrao; ao desligar, os raios somem e os marcadores dos pontos permanecem.
+- Foco por ponto: selecionar `hospital-unimed` destaca 1 ponto e suaviza os outros 11.
+- URL `/mapa.html?ponto=hospital-unimed`: abre com o ponto selecionado e destacado.
+- Erros novos de console na validacao: 0.
+
 Validacao final da branch `feature/mvppushbs-app-shell` em Docker:
 
 - `docker compose up -d --build`: OK, container `healthy`.

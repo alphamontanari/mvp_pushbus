@@ -1,4 +1,4 @@
-const CACHE_NAME = "mvppushbs-v0-0-3-shell";
+const CACHE_NAME = "mvppushbs-v0-0-4-map-controls";
 const SHELL_ASSETS = [
   "/",
   "/index.html",
@@ -43,6 +43,13 @@ self.addEventListener("fetch", event => {
 
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(fetch(event.request));
+    return;
+  }
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(url.pathname).then(cached => cached || caches.match("/")))
+    );
     return;
   }
 

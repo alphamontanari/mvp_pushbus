@@ -8,13 +8,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="MVPPUSHBS" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <link rel="manifest" href="manifest.webmanifest?v=mvppushbs2" />
+  <link rel="manifest" href="manifest.webmanifest?v=mvppushbs3" />
   <link rel="icon" href="pushbus-icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="linha-01a-pontos.css?v=mvppushbs2" />
-  <link rel="stylesheet" href="mapa.css?v=mvppushbs2" />
-  <link rel="stylesheet" href="nav.css?v=mvppushbs2" />
+  <link rel="stylesheet" href="linha-01a-pontos.css?v=mvppushbs3" />
+  <link rel="stylesheet" href="mapa.css?v=mvppushbs3" />
+  <link rel="stylesheet" href="nav.css?v=mvppushbs3" />
 </head>
 <body>
   <header class="topbar">
@@ -69,11 +69,34 @@
         <p id="selectedVehicleSummary">Escolha pelo combo ou de duplo clique em um onibus no mapa.</p>
       </section>
 
-      <div class="panel-heading">
-        <h2>Pontos da linha 01A</h2>
+      <section class="selector-card">
+        <label for="pointSelect">Ponto em foco</label>
+        <select id="pointSelect">
+          <option value="">Todos os pontos</option>
+        </select>
+        <p id="selectedPointSummary">Escolha um ponto para centralizar e destacar no mapa.</p>
+      </section>
+
+      <section class="map-options" aria-label="Opcoes do mapa">
+        <strong>Camadas do mapa</strong>
+        <label>
+          <input id="toggleRoute" type="checkbox" />
+          <span>Ligar pontos com linha</span>
+        </label>
+        <label>
+          <input id="toggleGeofence" type="checkbox" checked />
+          <span>Exibir raios dos pontos</span>
+        </label>
+        <label>
+          <input id="toggleStops" type="checkbox" checked />
+          <span>Exibir pontos no mapa</span>
+        </label>
+        <label>
+          <input id="toggleVehicles" type="checkbox" checked />
+          <span>Exibir onibus</span>
+        </label>
         <span id="updatedAt">Sem atualizacao</span>
-      </div>
-      <div id="pointList" class="point-list"></div>
+      </section>
     </aside>
 
     <section class="map-area" aria-label="Mapa dos pontos e todos os veiculos">
@@ -94,8 +117,8 @@
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="pushbus-data.js?v=mvppushbs2"></script>
-  <script src="mapa.js?v=mvppushbs2" defer></script>
-  <script src="nav.js?v=mvppushbs2" defer></script>
+  <script src="pushbus-data.js?v=mvppushbs3"></script>
+  <script src="mapa.js?v=mvppushbs3" defer></script>
+  <script src="nav.js?v=mvppushbs3" defer></script>
 </body>
 </html>
