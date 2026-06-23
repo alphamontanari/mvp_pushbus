@@ -4,6 +4,7 @@ const defaultVehicles = Array.isArray(window.PUSHBUS_DEFAULT_VEHICLES)
   : [];
 
 const RESET_AFTER_FINAL_MS = 30000;
+const LINE_NEAR_STOP_RADIUS_METERS = 1200;
 
 const state = {
   selectedLineId: "",
@@ -181,10 +182,35 @@ function selectedApiLineCode(line) {
   return line?.code || line?.displayCode || "";
 }
 
+function selectedLineAliases(line) {
+  if (!line) return [];
+
+  return [
+    line.code,
+    line.displayCode,
+    line.name,
+    ...(line.aliases || [])
+  ].filter(Boolean);
+}
+
+function selectedLineStops(line) {
+  if (!line) return [];
+
+  return line.stops.map(stop => ({
+    id: stop.id,
+    lat: stop.lat,
+    lng: stop.lng,
+    radius: stop.radius
+  }));
+}
+
 function selectedVehicleIds() {
   if (state.selectedVehicleId !== "auto") return [Number(state.selectedVehicleId)].filter(Number.isFinite);
-  if (state.lineVehicles.length) return state.lineVehicles.map(vehicle => Number(vehicle.id)).filter(Number.isFinite);
-  return defaultVehicles;
+  return [];
+}
+
+function shouldRequestAllVehicles() {
+  return state.selectedVehicleId === "auto";
 }
 
 function vehicleLabel(vehicle) {
@@ -242,6 +268,7 @@ function renderLineBrowser() {
 
 function renderVehicleSelect() {
   const vehicles = state.lineVehicles;
+  const line = currentLine();
 
   if (!vehicles.length) {
     els.vehicleSelect.innerHTML = "<option value=\"auto\">Aguardando API</option>";
@@ -252,7 +279,13 @@ function renderVehicleSelect() {
   els.vehicleSelect.innerHTML = [
     "<option value=\"auto\">Automatico</option>",
     ...vehicles.map(vehicle => {
-      const label = `${vehicleLabel(vehicle)} - Linha ${vehicle.line || "-"}`;
+      const nearby = line ? nearestStop(vehicle, line) : null;
+      const nearText = nearby ? ` - ${formatDistance(nearby.distance)} de ${nearby.stop.name}` : "";
+      const lineText = vehicle.line || vehicle.route || "sem linha";
+      const sourceText = vehicle.lineMatch
+        ? `Linha ${lineText}`
+        : `Proximo dos pontos (${lineText})`;
+      const label = `${vehicleLabel(vehicle)} - ${sourceText}${nearText}`;
       return `<option value="${escapeHtml(vehicle.id)}">${escapeHtml(label)}</option>`;
     })
   ].join("");
@@ -307,21 +340,37 @@ function nearestStop(vehicle, line) {
     .sort((a, b) => a.distance - b.distance)[0] || null;
 }
 
-function updateProgressFromGeofence(vehicle, line) {
-  if (!vehicle) return null;
+function vehiclesForProgress(vehicles) {
+  if (state.selectedVehicleId === "auto") return vehicles;
+  return vehicles.filter(vehicle => String(vehicle.id) === String(state.selectedVehicleId));
+}
 
-  const nearby = nearestStop(vehicle, line);
-  if (!nearby) return null;
+function updateProgressFromGeofences(vehicles, line) {
+  const candidates = vehicles
+    .map(vehicle => ({
+      vehicle,
+      nearby: nearestStop(vehicle, line)
+    }))
+    .filter(item => item.nearby && item.nearby.distance <= item.nearby.stop.radius)
+    .sort((a, b) => a.nearby.index - b.nearby.index || a.nearby.distance - b.nearby.distance);
 
-  if (nearby.distance <= nearby.stop.radius) {
+  let lastPassage = null;
+  const progressCandidates = candidates.some(item => item.vehicle.lineMatch)
+    ? candidates.filter(item => item.vehicle.lineMatch)
+    : candidates;
+
+  progressCandidates.forEach(item => {
     const before = getPassedIndex(line);
-    setPassedIndex(nearby.index, line);
+    setPassedIndex(item.nearby.index, line);
     const after = getPassedIndex(line);
-    if (after > before) addPassageEvent(vehicle, line, nearby);
-  }
+    if (after > before) {
+      addPassageEvent(item.vehicle, line, item.nearby);
+      lastPassage = item;
+    }
+  });
 
   scheduleFinalReset(line);
-  return nearby;
+  return lastPassage || candidates[0] || null;
 }
 
 function nextStopInfo(vehicle, line) {
@@ -446,7 +495,7 @@ function sendBrowserNotification(title, body, tag) {
 
 function renderVehicleStatus(vehicle, line, nearby) {
   if (!vehicle) {
-    els.vehicleStatus.textContent = "Nenhum onibus rodando nesta linha agora.";
+    els.vehicleStatus.textContent = "Nenhum onibus da linha ou proximo dos pontos agora.";
     return;
   }
 
@@ -496,14 +545,19 @@ async function refreshPositions() {
   try {
     const data = await apiPost("/api/vehicles/positions", {
       lineCode: selectedApiLineCode(line),
+      lineAliases: selectedLineAliases(line),
+      lineStops: selectedLineStops(line),
+      nearStopRadiusMeters: LINE_NEAR_STOP_RADIUS_METERS,
+      allVehicles: shouldRequestAllVehicles(),
       lines: [],
       vehicles: selectedVehicleIds()
     });
     const vehicles = Array.isArray(data.vehicles) ? data.vehicles : [];
     state.lineVehicles = vehicles;
-    const vehicle = chooseVehicleForProgress(vehicles, line);
+    const progressHit = updateProgressFromGeofences(vehiclesForProgress(vehicles), line);
+    const vehicle = progressHit?.vehicle || chooseVehicleForProgress(vehicles, line);
     state.latestVehicle = vehicle || null;
-    const nearby = updateProgressFromGeofence(vehicle, line);
+    const nearby = progressHit?.nearby || nearestStop(vehicle, line);
 
     renderVehicleSelect();
     renderTimeline();
