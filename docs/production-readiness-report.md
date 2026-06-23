@@ -117,6 +117,24 @@ Validacao do fix em Docker:
 - URL `/mapa.html?ponto=hospital-unimed`: abre com o ponto selecionado e destacado.
 - Erros novos de console na validacao: 0.
 
+Feature separada `feature/pontos-onibus`:
+
+- Nova pagina `pontos-onibus.html` para visao em lista pesquisavel dos pontos.
+- Cada ponto abre `/mapa.html?ponto=<id>` para centralizar e destacar o ponto no mapa.
+- Menu responsivo atualizado com o item `Pontos de onibus`.
+- Esta feature foi criada separadamente para nao ser mesclada automaticamente em `productionfull`.
+
+Validacao da feature:
+
+- `docker compose up -d --build`: OK, container `healthy`.
+- `npm run smoke`: OK, incluindo `/pontos-onibus.html`.
+- Browser em `/pontos-onibus.html`: 12 cards renderizados.
+- Busca por `Meia`: 1 resultado, apontando para `/mapa.html?ponto=meia-lua-rodoviaria`.
+- Clique no ponto filtrado: abriu o mapa com `pointSelectValue=meia-lua-rodoviaria`.
+- Mapa apos clique: 1 ponto destacado e 25 onibus plotados.
+- Menu nas paginas da feature: Inicio, Mapa, Pontos de onibus, Linha 01A e Tempo real.
+- Erros novos de console na validacao: 0.
+
 Validacao final da branch `feature/mvppushbs-app-shell` em Docker:
 
 - `docker compose up -d --build`: OK, container `healthy`.

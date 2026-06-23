@@ -6,10 +6,11 @@ const timeoutMs = Number(process.env.SMOKE_TIMEOUT_MS || 10000);
 const pageChecks = [
   { path: "/", title: "MVPPUSHBS" },
   { path: "/mapa.html", title: "MVPPUSHBS - Mapa" },
+  { path: "/pontos-onibus.html", title: "MVPPUSHBS - Pontos de Onibus" },
   { path: "/linha-01a-pontos.html", title: "MVPPUSHBS - Linha 01A" },
   { path: "/realtime-pontos.html", title: "MVPPUSHBS - Tempo real" },
   { path: "/manifest.webmanifest", contains: "MVPPUSHBS" },
-  { path: "/sw.js", contains: "mvppushbs-v0-0-4-map-controls" }
+  { path: "/sw.js", contains: "mvppushbs-v0-0-6-pontos-page" }
 ];
 
 async function request(path) {

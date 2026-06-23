@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>MVPPUSHBS - Pontos de Onibus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f7a36" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="MVPPUSHBS" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="manifest.webmanifest?v=mvppushbs4" />
+  <link rel="icon" href="pushbus-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="pushbus.css?v=mvppushbs4" />
+  <link rel="stylesheet" href="pontos-onibus.css?v=mvppushbs4" />
+  <link rel="stylesheet" href="nav.css?v=mvppushbs4" />
+</head>
+<body>
+  <main class="points-page">
+    <header class="points-hero">
+      <p class="eyebrow">MVPPUSHBS</p>
+      <h1>Pontos de onibus</h1>
+      <span>Escolha um ponto da linha 01A para abrir o mapa ja centralizado e destacado nele.</span>
+    </header>
+
+    <section class="points-tools">
+      <label class="search-box">
+        <span>Pesquisar ponto</span>
+        <input id="pointSearch" type="search" placeholder="Ex.: Hospital, Cohab, Meia Lua..." autocomplete="off" />
+      </label>
+      <div class="points-count">
+        <strong id="pointCount">0</strong>
+        <span>pontos cadastrados</span>
+      </div>
+    </section>
+
+    <section id="pointsList" class="points-grid" aria-label="Lista de pontos de onibus"></section>
+  </main>
+
+  <script src="pushbus-data.js?v=mvppushbs4"></script>
+  <script src="pontos-onibus.js?v=mvppushbs4" defer></script>
+  <script src="nav.js?v=mvppushbs5" defer></script>
+</body>
+</html>

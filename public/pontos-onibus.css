@@ -1,0 +1,153 @@
+body {
+  background: #f5faf7;
+}
+
+.points-page {
+  width: min(100%, 980px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 22px 18px 32px;
+}
+
+.points-hero,
+.points-tools,
+.point-link {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(13, 41, 52, .07);
+}
+
+.points-hero {
+  padding: 20px;
+}
+
+.points-hero h1,
+.points-hero p,
+.points-hero span {
+  margin: 0;
+}
+
+.points-hero h1 {
+  margin-top: 4px;
+  color: var(--green-dark);
+  font-size: 30px;
+  line-height: 1.12;
+}
+
+.points-hero span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.points-tools {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+}
+
+.points-tools .search-box {
+  margin-top: 0;
+}
+
+.points-count {
+  min-height: 46px;
+  display: grid;
+  align-content: center;
+  padding: 8px 10px;
+  border: 1px solid #d8e4df;
+  border-radius: 12px;
+  background: #fbfdfb;
+}
+
+.points-count strong,
+.points-count span {
+  display: block;
+}
+
+.points-count strong {
+  color: var(--green-dark);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.points-count span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.points-grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.point-link {
+  min-height: 150px;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  padding: 14px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.point-link:hover {
+  border-color: #90d8a3;
+  background: #fbfdfb;
+}
+
+.point-index {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #e8f6ec;
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
+.point-link strong,
+.point-link span,
+.point-link small {
+  display: block;
+}
+
+.point-link strong {
+  color: var(--green-dark);
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.point-link span {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.point-link small {
+  margin-top: 12px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .points-page {
+    padding: 12px;
+  }
+
+  .points-tools {
+    grid-template-columns: 1fr;
+  }
+}

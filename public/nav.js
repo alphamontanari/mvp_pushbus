@@ -3,6 +3,7 @@
   const links = [
     { href: "/", label: "Inicio" },
     { href: "/mapa.html", label: "Mapa" },
+    { href: "/pontos-onibus.html", label: "Pontos de onibus" },
     { href: "/linha-01a-pontos.html", label: "Linha 01A" },
     { href: "/realtime-pontos.html", label: "Tempo real" }
   ];

@@ -86,10 +86,11 @@ Nao coloque usuario, senha ou token no JavaScript publico.
 | MVPPUSHBS | `http://localhost:3000/` | App principal instalavel no celular. Abre na lista de linhas e, ao selecionar uma linha, exibe a progressao dos pontos e o onibus/carro monitorado. Inclui botao para ativar push local. |
 | MVPPUSHBS | `http://localhost:3000/index.html` | Mesma tela principal, acessada pelo arquivo HTML diretamente. |
 | Mapa de todos os onibus | `http://localhost:3000/mapa.html` | Mapa com os mesmos pontos da linha 01A, mas consultando todos os veiculos padrao sem filtro de linha. Permite mostrar todos, focar um onibus, focar um ponto, ligar/desligar camadas do mapa e gerar mensagem quando qualquer onibus passa no ponto. |
+| Pontos de onibus | `http://localhost:3000/pontos-onibus.html` | Lista pesquisavel dos pontos cadastrados. Ao clicar em um ponto, abre `mapa.html?ponto=<id>` com o ponto centralizado e destacado. |
 | Linha 01A por ponto | `http://localhost:3000/linha-01a-pontos.html` | Tela com pontos da linha 01A, geofence, mapa dos veiculos filtrados e mensagens de entrada/saida dos pontos. |
 | Onibus em tempo real por ponto | `http://localhost:3000/realtime-pontos.html` | Nova tela com um veiculo em tempo real, pontos no mapa, circulos de geofence e mensagem `Passou no ponto X` quando o veiculo entra no raio do ponto. |
 
-Todas as paginas carregam um menu responsivo tipo sanduiche para navegar entre Inicio, Mapa, Linha 01A e Tempo real.
+Todas as paginas carregam um menu responsivo tipo sanduiche para navegar entre Inicio, Mapa, Pontos de onibus, Linha 01A e Tempo real.
 
 Arquivos estaticos carregados pelas paginas:
 
@@ -103,6 +104,8 @@ http://localhost:3000/manifest.webmanifest
 http://localhost:3000/sw.js
 http://localhost:3000/mapa.css
 http://localhost:3000/mapa.js
+http://localhost:3000/pontos-onibus.css
+http://localhost:3000/pontos-onibus.js
 http://localhost:3000/linha-01a-pontos.css
 http://localhost:3000/linha-01a-pontos.js
 http://localhost:3000/realtime-pontos.css

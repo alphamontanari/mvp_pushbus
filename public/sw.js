@@ -1,8 +1,9 @@
-const CACHE_NAME = "mvppushbs-v0-0-4-map-controls";
+const CACHE_NAME = "mvppushbs-v0-0-6-pontos-page";
 const SHELL_ASSETS = [
   "/",
   "/index.html",
   "/mapa.html",
+  "/pontos-onibus.html",
   "/linha-01a-pontos.html",
   "/realtime-pontos.html",
   "/pushbus.css",
@@ -10,6 +11,8 @@ const SHELL_ASSETS = [
   "/pushbus-data.js",
   "/mapa.css",
   "/mapa.js",
+  "/pontos-onibus.css",
+  "/pontos-onibus.js",
   "/linha-01a-pontos.css",
   "/linha-01a-pontos.js",
   "/realtime-pontos.css",
@@ -57,6 +60,10 @@ self.addEventListener("fetch", event => {
     caches.match(event.request)
       .then(cached => {
         if (cached) return cached;
+
+        if (url.search) {
+          return fetch(event.request).catch(() => caches.match(url.pathname));
+        }
 
         return caches.match(url.pathname).then(fallback => fallback || fetch(event.request));
       })
