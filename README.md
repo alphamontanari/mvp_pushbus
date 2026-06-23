@@ -32,7 +32,7 @@ Variaveis principais de deploy:
 APP_HOST=mvp-pushbus.i9cidade.com.br
 TRAEFIK_NETWORK=web
 TRAEFIK_ENTRYPOINT=websecure
-TRAEFIK_CERTRESOLVER=lets-encrypt
+TRAEFIK_CERTRESOLVER=letsencrypt
 IMAGE_NAME=mvp-pushbus
 IMAGE_TAG=productionfull
 ```
@@ -56,6 +56,16 @@ Para ver o estado:
 ```bash
 docker compose ps
 docker compose logs -f api
+```
+
+Se o dominio abrir o app, mas o navegador mostrar certificado invalido ou `TRAEFIK DEFAULT CERT`, confira no container do Traefik:
+
+- O nome do resolver ACME precisa ser o mesmo de `TRAEFIK_CERTRESOLVER`. O default deste projeto e `letsencrypt`; atualize a variavel no Portainer/servidor se ela ainda estiver como `lets-encrypt`.
+- O dominio em `APP_HOST` precisa apontar para o servidor do Traefik em todos os registros publicados. Se houver registro `AAAA`, ele tambem precisa chegar ao mesmo Traefik; se o servidor nao usa IPv6, remova o `AAAA`.
+- Os logs do Traefik devem mostrar a tentativa ACME para o host:
+
+```bash
+docker logs traefik --tail=200 | grep -i "mvp-pushbus\|acme\|resolver\|certificate"
 ```
 
 Comandos uteis:

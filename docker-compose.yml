@@ -38,7 +38,7 @@ services:
       - "traefik.http.routers.mvp-pushbus.rule=Host(`${APP_HOST:-mvp-pushbus.i9cidade.com.br}`)"
       - "traefik.http.routers.mvp-pushbus.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
       - "traefik.http.routers.mvp-pushbus.tls=true"
-      - "traefik.http.routers.mvp-pushbus.tls.certresolver=${TRAEFIK_CERTRESOLVER:-lets-encrypt}"
+      - "traefik.http.routers.mvp-pushbus.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
 
       - "traefik.http.services.mvp-pushbus.loadbalancer.server.port=${PORT:-3000}"
 
