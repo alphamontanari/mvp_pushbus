@@ -135,6 +135,27 @@ Validacao da feature:
 - Menu nas paginas da feature: Inicio, Mapa, Pontos de onibus, Linha 01A e Tempo real.
 - Erros novos de console na validacao: 0.
 
+## Promocao main e Docker de producao
+
+Fluxo executado depois dos testes funcionais:
+
+- `productionfull` foi mesclada em `main` por fast-forward.
+- `main` foi enviada para `origin/main`.
+- `productionfull` passou a manter configuracao Docker de servidor.
+- `docker-compose.yml` foi ajustado para o padrao de producao com Traefik, rede externa `web`, TLS e sem `ports`.
+- `Dockerfile` manteve multi-stage, usuario nao-root e `tini`, com adicao de `tzdata`, labels OCI e `TZ=America/Sao_Paulo`.
+- `.env.example` recebeu `APP_HOST`, `TRAEFIK_NETWORK`, `TRAEFIK_ENTRYPOINT`, `TRAEFIK_CERTRESOLVER`, `IMAGE_NAME` e `IMAGE_TAG`.
+
+Validacao da configuracao de producao:
+
+- `docker compose config --quiet`: OK.
+- Rede externa local `web`: presente para teste.
+- `docker compose up -d --build`: OK.
+- Servico `api`: `healthy`.
+- Porta no Compose: somente `3000/tcp` interno, sem bind direto `3000:3000` no host.
+- Imagem gerada: `mvp-pushbus:productionfull`.
+- Teste interno via `docker compose exec -T api`: HTTP 200 em `/api/health`, `/`, `/mapa.html`, `/pontos-onibus.html`, `/linha-01a-pontos.html`, `/realtime-pontos.html`, `/manifest.webmanifest` e `/sw.js`.
+
 Validacao final da branch `feature/mvppushbs-app-shell` em Docker:
 
 - `docker compose up -d --build`: OK, container `healthy`.

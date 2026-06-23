@@ -11,11 +11,18 @@ RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 FROM node:22-alpine AS runtime
 WORKDIR /app
 
+ARG APP_VERSION=productionfull
+
+LABEL org.opencontainers.image.title="MVPPUSHBS"
+LABEL org.opencontainers.image.description="MVP PushBus para acompanhamento de onibus, pontos e mensagens por geofence"
+LABEL org.opencontainers.image.version="${APP_VERSION}"
+
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
+ENV TZ=America/Sao_Paulo
 
-RUN apk add --no-cache tini
+RUN apk add --no-cache tini tzdata
 
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node package*.json ./

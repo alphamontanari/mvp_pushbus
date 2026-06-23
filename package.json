@@ -10,9 +10,9 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "smoke": "node scripts/smoke-test.mjs",
-    "docker:build": "docker build -t pushbus-mvp:productionfull .",
-    "docker:up": "docker compose up --build",
-    "docker:down": "docker compose down"
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down --remove-orphans"
   },
   "dependencies": {
     "cors": "^2.8.5",

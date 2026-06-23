@@ -18,36 +18,55 @@ http://localhost:3000
 
 Se definir `PORT` no `.env`, troque `3000` pela porta configurada.
 
-## Como rodar com Docker
+## Como rodar com Docker em producao
 
-Crie o `.env` local a partir do exemplo e preencha as variaveis da Cittati/FLITS:
+A branch `productionfull` usa `docker-compose.yml` para servidor com Traefik, rede externa `web` e TLS automatico. Crie o `.env` no servidor a partir do exemplo e preencha as variaveis da Cittati/FLITS e do host publico:
 
 ```powershell
 copy .env.example .env
 ```
 
-Suba o container na porta 3000:
+Variaveis principais de deploy:
+
+```env
+APP_HOST=mvp-pushbus.i9cidade.com.br
+TRAEFIK_NETWORK=web
+TRAEFIK_ENTRYPOINT=websecure
+TRAEFIK_CERTRESOLVER=lets-encrypt
+IMAGE_NAME=mvp-pushbus
+IMAGE_TAG=productionfull
+```
+
+No servidor, a rede externa do Traefik precisa existir:
+
+```bash
+docker network create web
+```
+
+Suba o servico:
 
 ```bash
 docker compose up -d --build
 ```
 
-Abra:
+O Compose de producao nao publica `3000:3000` diretamente. O acesso publico deve passar pelo Traefik no host configurado em `APP_HOST`.
 
-```text
-http://localhost:3000
+Para ver o estado:
+
+```bash
+docker compose ps
+docker compose logs -f api
 ```
 
 Comandos uteis:
 
 ```bash
 docker compose ps
-docker compose logs -f app
-npm run smoke
+docker compose logs -f api
 docker compose down
 ```
 
-O Docker Compose le o arquivo `.env` do diretorio do projeto e envia as variaveis para o container. Em um ambiente de producao real, prefira configurar essas variaveis diretamente no provedor de deploy ou em um gerenciador de secrets.
+Para rodar na maquina local por `npm start`, use a branch `main`.
 
 ## Perfil de producao
 
@@ -59,6 +78,7 @@ O Docker Compose le o arquivo `.env` do diretorio do projeto e envia as variavei
 - `.dockerignore` exclui `.env`, `node_modules`, compactados e artefatos locais.
 - Servidor aceita `HOST` e `PORT`, usando `HOST=0.0.0.0` no container.
 - O header `X-Powered-By` do Express fica desabilitado.
+- Compose de producao usa Traefik na rede externa `web`, sem bind direto da porta 3000.
 
 Relatorio da validacao local: [`docs/production-readiness-report.md`](docs/production-readiness-report.md).
 
